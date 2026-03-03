@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTEL 전체 흐름</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Pretendard:wght@300;400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0e1a;
+    color: #e0e6f0;
+    font-family: 'Pretendard', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: #63b3ed;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f0f4ff;
+    margin-bottom: 48px;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── FLOW ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Layer */
+  .layer {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    position: relative;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .layer:nth-child(1) { animation-delay: 0.05s; }
+  .layer:nth-child(2) { animation-delay: 0.15s; }
+  .layer:nth-child(3) { animation-delay: 0.25s; }
+  .layer:nth-child(4) { animation-delay: 0.35s; }
+  .layer:nth-child(5) { animation-delay: 0.45s; }
+  .layer:nth-child(6) { animation-delay: 0.55s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .layer-label {
+    width: 100px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 16px;
+  }
+
+  .layer-label span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #4a5568;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: right;
+  }
+
+  .layer-content {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  /* Arrow between layers */
+  .arrow-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 40px;
+  }
+
+  .arrow-spacer { width: 100px; flex-shrink: 0; }
+
+  .arrow-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .arrow-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .arrow-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #4a5568;
+    letter-spacing: 0.08em;
+  }
+
+  .arrow-line {
+    width: 2px;
+    height: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .arrow-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--arrow-color, #63b3ed));
+  }
+
+  .arrow-line::after {
+    content: '▼';
+    position: absolute;
+    bottom: -8px;
+    font-size: 8px;
+    color: var(--arrow-color, #63b3ed);
+  }
+
+  /* Cards */
+  .card {
+    flex: 1;
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    border-radius: 10px;
+  }
+
+  .card-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .card-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #a0aec0;
+  }
+
+  .card-item .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .card-item .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: auto;
+  }
+
+  /* Color themes */
+  .theme-app {
+    border-color: #2d4a7a;
+    background: rgba(45, 74, 122, 0.12);
+    box-shadow: 0 0 20px rgba(99,179,237,0.05);
+  }
+  .theme-app:hover { box-shadow: 0 4px 24px rgba(99,179,237,0.12); }
+  .theme-app .card-title { color: #63b3ed; }
+  .theme-app .dot { background: #63b3ed; }
+  .theme-app .tag { background: rgba(99,179,237,0.15); color: #63b3ed; }
+
+  .theme-sdk {
+    border-color: #2d5a4a;
+    background: rgba(45, 90, 74, 0.12);
+  }
+  .theme-sdk:hover { box-shadow: 0 4px 24px rgba(72,187,120,0.12); }
+  .theme-sdk .card-title { color: #68d391; }
+  .theme-sdk .dot { background: #68d391; }
+  .theme-sdk .tag { background: rgba(72,187,120,0.15); color: #68d391; }
+
+  .theme-collector {
+    border-color: #5a4a2d;
+    background: rgba(90, 74, 45, 0.12);
+  }
+  .theme-collector:hover { box-shadow: 0 4px 24px rgba(246,173,85,0.12); }
+  .theme-collector .card-title { color: #f6ad55; }
+  .theme-collector .dot { background: #f6ad55; }
+  .theme-collector .tag { background: rgba(246,173,85,0.15); color: #f6ad55; }
+
+  .theme-backend {
+    border-color: #4a2d5a;
+    background: rgba(74, 45, 90, 0.12);
+  }
+  .theme-backend:hover { box-shadow: 0 4px 24px rgba(183,148,246,0.12); }
+  .theme-backend .card-title { color: #b794f6; }
+  .theme-backend .dot { background: #b794f6; }
+  .theme-backend .tag { background: rgba(183,148,246,0.15); color: #b794f6; }
+
+  .theme-storage {
+    border-color: #5a2d2d;
+    background: rgba(90, 45, 45, 0.12);
+  }
+  .theme-storage:hover { box-shadow: 0 4px 24px rgba(252,129,74,0.12); }
+  .theme-storage .card-title { color: #fc814a; }
+  .theme-storage .dot { background: #fc814a; }
+  .theme-storage .tag { background: rgba(252,129,74,0.15); color: #fc814a; }
+
+  .theme-grafana {
+    border-color: #3a2d1a;
+    background: rgba(58, 45, 26, 0.18);
+  }
+  .theme-grafana:hover { box-shadow: 0 4px 24px rgba(246,224,94,0.12); }
+  .theme-grafana .card-title { color: #f6e05e; }
+  .theme-grafana .dot { background: #f6e05e; }
+  .theme-grafana .tag { background: rgba(246,224,94,0.15); color: #f6e05e; }
+
+  /* Signal badges */
+  .signals {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .signal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 0.05em;
+  }
+
+  .signal-log   { color: #68d391; border-color: #68d391; background: rgba(72,187,120,0.08); }
+  .signal-metric{ color: #63b3ed; border-color: #63b3ed; background: rgba(99,179,237,0.08); }
+  .signal-trace { color: #fc814a; border-color: #fc814a; background: rgba(252,129,74,0.08); }
+
+  /* Wide card */
+  .card-wide {
+    flex: 1;
+  }
+
+  /* Protocol badge */
+  .protocol {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: #4a5568;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #4a5568;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Multi-output arrows */
+  .fork-arrows {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 0 0 0 116px;
+    height: 48px;
+    position: relative;
+  }
+
+  .fork-line {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-top: 4px;
+  }
+
+  .fork-line-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #4a5568;
+  }
+
+  .fork-arrow-down {
+    width: 1px;
+    flex: 1;
+    position: relative;
+  }
+
+  .fork-arrow-down::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--c), transparent 60%, var(--c));
+    opacity: 0.5;
+  }
+
+  .fork-arrow-down::after {
+    content: '▼';
+    position: absolute;
+    bottom: -8px;
+    left: -4px;
+    font-size: 8px;
+    color: var(--c);
+  }
+
+  .single-arrow {
+    display: flex;
+    align-items: flex-start;
+    padding: 0 0 0 116px;
+    height: 40px;
+  }
+
+  .single-arrow-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-top: 4px;
+  }
+
+  .vertical-line {
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, #63b3ed44, #63b3ed);
+    position: relative;
+  }
+
+  .vertical-line::after {
+    content: '▼';
+    position: absolute;
+    bottom: -10px;
+    left: -4px;
+    font-size: 8px;
+    color: #63b3ed;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Observability Architecture</h1>
+  <h2>OTEL 기반 전체 데이터 흐름</h2>
+
+  <div class="flow">
+
+    <!-- Layer 1: App -->
+    <div class="layer">
+      <div class="layer-label"><span>앱 코드</span></div>
+      <div class="layer-content">
+        <div class="card theme-app card-wide">
+          <div class="protocol">Business Logic</div>
+          <div class="card-title">APPLICATION</div>
+          <div class="card-items">
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>API 요청 처리 → 로그 출력 (stdout)</span>
+            </div>
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>Counter/Histogram 업데이트</span>
+            </div>
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>Span 생성 → 비즈니스 로직 → Span 종료</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="single-arrow">
+      <div class="single-arrow-inner">
+        <span style="font-family:JetBrains Mono,monospace;font-size:9px;color:#4a5568;">OTEL SDK 계측</span>
+        <div class="vertical-line"></div>
+      </div>
+    </div>
+
+    <!-- Layer 2: SDK -->
+    <div class="layer">
+      <div class="layer-label"><span>SDK</span></div>
+      <div class="layer-content">
+        <div class="card theme-sdk">
+          <div class="card-title">OTel Logger</div>
+          <div class="card-items">
+            <div class="card-item"><span class="dot"></span><span>로그 수집</span></div>
+            <div class="card-item"><span class="dot"></span><span>컨텍스트 주입</span></div>
+          </div>
+          <div class="signals"><span class="signal signal-log">LOG</span></div>
+        </div>
+        <div class="card theme-sdk">
+          <div class="card-title">OTel Meter</div>
+          <div class="card-items">
+            <div class="card-item"><span class="dot"></span><span>메트릭 집계</span></div>
+            <div class="card-item"><span class="dot"></span><span>주기적 export</span></div>
+          </div>
+          <div class="signals"><span class="signal signal-metric">METRIC</span></div>
+        </div>
+        <div class="card theme-sdk">
+          <div class="card-title">OTel Tracer</div>
+          <div class="card-items">
+            <div class="card-item"><span class="dot"></span><span>Span 생성/종료</span></div>
+            <div class="card-item"><span class="dot"></span><span>BatchProcessor 버퍼</span></div>
+          </div>
+          <div class="signals"><span class="signal signal-trace">TRACE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="single-arrow">
+      <div class="single-arrow-inner">
+        <span style="font-family:JetBrains Mono,monospace;font-size:9px;color:#4a5568;">OTLP gRPC Push · 4317 · 5초 or 512개 배치</span>
+        <div class="vertical-line"></div>
+      </div>
+    </div>
+
+    <!-- Layer 3: Collector -->
+    <div class="layer">
+      <div class="layer-label"><span>Collector</span></div>
+      <div class="layer-content">
+        <div class="card theme-collector card-wide">
+          <div class="protocol">ADOT / OTEL Collector</div>
+          <div class="card-title">PIPELINE</div>
+          <div class="card-items">
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>Receiver — OTLP 수신 (로그 + 메트릭 + 트레이스 한번에)</span>
+              <span class="tag">IN</span>
+            </div>
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>Processor — batch / filter / sampling</span>
+              <span class="tag">PROC</span>
+            </div>
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>Exporter — 신호별로 백엔드에 분기 전달</span>
+              <span class="tag">OUT</span>
+            </div>
+          </div>
+          <div class="signals">
+            <span class="signal signal-log">LOG</span>
+            <span class="signal signal-metric">METRIC</span>
+            <span class="signal signal-trace">TRACE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fork arrows -->
+    <div class="fork-arrows">
+      <div class="fork-line">
+        <span class="fork-line-label" style="color:#68d391;">→ Loki</span>
+        <div class="fork-arrow-down" style="--c:#68d391;"></div>
+      </div>
+      <div class="fork-line">
+        <span class="fork-line-label" style="color:#63b3ed;">→ Prometheus</span>
+        <div class="fork-arrow-down" style="--c:#63b3ed;"></div>
+      </div>
+      <div class="fork-line">
+        <span class="fork-line-label" style="color:#fc814a;">→ Tempo</span>
+        <div class="fork-arrow-down" style="--c:#fc814a;"></div>
+      </div>
+    </div>
+
+    <!-- Layer 4: Backends -->
+    <div class="layer">
+      <div class="layer-label"><span>백엔드</span></div>
+      <div class="layer-content">
+        <div class="card theme-backend">
+          <div class="card-title" style="color:#68d391;">LOKI</div>
+          <div class="card-items">
+            <div class="card-item"><span class="dot" style="background:#68d391;"></span><span>로그 Chunk 저장</span></div>
+            <div class="card-item"><span class="dot" style="background:#68d391;"></span><span>인덱싱 (TSDB)</span></div>
+            <div class="card-item"><span class="dot" style="background:#68d391;"></span><span>S3에 Chunk 업로드</span></div>
+          </div>
+          <div class="signals"><span class="signal signal-log">LOG</span></div>
+        </div>
+        <div class="card theme-backend">
+          <div class="card-title" style="color:#63b3ed;">PROMETHEUS</div>
+          <div class="card-items">
+            <div class="card-item"><span class="dot"></span><span>TSDB 저장</span></div>
+            <div class="card-item"><span class="dot"></span><span>로컬 EBS</span></div>
+            <div class="card-item"><span class="dot"></span><span>장기보관 → Thanos/Mimir</span></div>
+          </div>
+          <div class="signals"><span class="signal signal-metric">METRIC</span></div>
+        </div>
+        <div class="card theme-backend">
+          <div class="card-title" style="color:#fc814a;">TEMPO</div>
+          <div class="card-items">
+            <div class="card-item"><span class="dot" style="background:#fc814a;"></span><span>트레이스 Block 저장</span></div>
+            <div class="card-item"><span class="dot" style="background:#fc814a;"></span><span>S3에 Block 업로드</span></div>
+            <div class="card-item"><span class="dot" style="background:#fc814a;"></span><span>TraceQL 쿼리 지원</span></div>
+          </div>
+          <div class="signals"><span class="signal signal-trace">TRACE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 4 -->
+    <div class="single-arrow">
+      <div class="single-arrow-inner">
+        <span style="font-family:JetBrains Mono,monospace;font-size:9px;color:#4a5568;">사용자 쿼리 시 API 호출 (실시간)</span>
+        <div class="vertical-line" style="background:linear-gradient(to bottom,#f6e05e44,#f6e05e);"></div>
+      </div>
+    </div>
+
+    <!-- Layer 5: Grafana -->
+    <div class="layer">
+      <div class="layer-label"><span>시각화</span></div>
+      <div class="layer-content">
+        <div class="card theme-grafana card-wide">
+          <div class="protocol">Dashboard / Explore</div>
+          <div class="card-title">GRAFANA</div>
+          <div class="card-items">
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>LogQL → Loki API 호출</span>
+              <span class="tag" style="background:rgba(104,211,145,0.15);color:#68d391;">로그</span>
+            </div>
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>PromQL → Prometheus API 호출</span>
+              <span class="tag" style="background:rgba(99,179,237,0.15);color:#63b3ed;">메트릭</span>
+            </div>
+            <div class="card-item">
+              <span class="dot"></span>
+              <span>TraceQL → Tempo API 호출</span>
+              <span class="tag" style="background:rgba(252,129,74,0.15);color:#fc814a;">트레이스</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end flow -->
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#68d391;"></div><span>로그 신호</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#63b3ed;"></div><span>메트릭 신호</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fc814a;"></div><span>트레이스 신호</span></div>
+    <div class="legend-item" style="margin-left:auto;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;">Grafana는 저장하지 않음 — 쿼리 시점에 각 백엔드 API 호출</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
