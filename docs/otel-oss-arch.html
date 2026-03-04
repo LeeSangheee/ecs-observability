@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3차 프로젝트 — OSS 모니터링 아키텍처</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:        #080c18;
+    --surface:   #0e1525;
+    --border:    rgba(255,255,255,0.07);
+    --text-dim:  #3d4f6e;
+    --text-mid:  #7a8fa8;
+    --text-main: #c8d6e8;
+
+    --blue:   #4fa3e0;
+    --green:  #56d490;
+    --orange: #f5924e;
+    --purple: #a78bfa;
+    --yellow: #f5d769;
+    --red:    #f06b6b;
+
+    --aws:   #f59e0b;   /* ADOT 유일 AWS */
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-main);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 격자 배경 */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(79,163,224,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,163,224,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 32px 72px;
+  }
+
+  /* ── 헤더 ── */
+  .hdr-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em;
+    color: var(--blue); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .hdr-title {
+    font-size: 26px; font-weight: 700;
+    color: #e8f0fb; letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .hdr-sub {
+    font-size: 13px; color: var(--text-mid);
+    margin-bottom: 48px;
+  }
+
+  /* ── 범례 ── */
+  .legend-bar {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    margin-bottom: 40px;
+    padding: 12px 18px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .leg { display:flex; align-items:center; gap:8px; font-size:12px; color: var(--text-mid); }
+  .leg-dot {
+    width: 10px; height: 10px; border-radius: 2px;
+  }
+  .leg-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; padding: 2px 7px; border-radius: 3px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── 메인 다이어그램 ── */
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* 레이어 행 */
+  .row {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    animation: fadeUp 0.45s ease both;
+  }
+  .row:nth-child(1)  { animation-delay:.04s }
+  .row:nth-child(3)  { animation-delay:.12s }
+  .row:nth-child(5)  { animation-delay:.20s }
+  .row:nth-child(7)  { animation-delay:.28s }
+  .row:nth-child(9)  { animation-delay:.36s }
+  .row:nth-child(11) { animation-delay:.44s }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* 왼쪽 레이블 */
+  .row-label {
+    width: 96px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 14px;
+  }
+  .row-label span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-dim); text-align: right;
+  }
+
+  .row-body {
+    flex: 1;
+    display: flex; gap: 12px; align-items: stretch;
+  }
+
+  /* ── 카드 ── */
+  .card {
+    flex: 1;
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid;
+    position: relative; overflow: hidden;
+    transition: transform .18s, box-shadow .18s;
+    cursor: default;
+  }
+  .card:hover { transform: translateY(-2px); }
+
+  .card-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+  }
+  .card-icon {
+    width: 22px; height: 22px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+  }
+  .card-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+  }
+  .card-badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; padding: 2px 7px; border-radius: 12px;
+    border: 1px solid; letter-spacing: 0.04em;
+  }
+
+  .card-rows { display: flex; flex-direction: column; gap: 5px; }
+  .card-row {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 12px; color: var(--text-mid); line-height: 1.4;
+  }
+  .card-row .bul {
+    width: 5px; height: 5px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 4px;
+  }
+
+  .sig-row { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
+  .sig {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; padding: 2px 8px; border-radius: 20px;
+    border: 1px solid; letter-spacing: 0.04em;
+  }
+
+  /* 카드 테마 */
+  .t-app     { border-color:#2a3f68; background:rgba(42,63,104,.14); }
+  .t-app .card-name    { color: var(--blue); }
+  .t-app .bul          { background: var(--blue); }
+  .t-app .card-icon    { background: rgba(79,163,224,.15); color: var(--blue); }
+  .t-app:hover         { box-shadow: 0 4px 24px rgba(79,163,224,.12); }
+
+  .t-adot    { border-color:#5c3d0a; background:rgba(92,61,10,.18); }
+  .t-adot .card-name   { color: var(--aws); }
+  .t-adot .bul         { background: var(--aws); }
+  .t-adot .card-icon   { background: rgba(245,158,11,.15); color: var(--aws); }
+  .t-adot:hover        { box-shadow: 0 4px 24px rgba(245,158,11,.15); }
+  .t-adot .card-badge  { color: var(--aws); border-color: var(--aws); background: rgba(245,158,11,.08); }
+
+  .t-loki    { border-color:#204a38; background:rgba(32,74,56,.14); }
+  .t-loki .card-name   { color: var(--green); }
+  .t-loki .bul         { background: var(--green); }
+  .t-loki .card-icon   { background: rgba(86,212,144,.12); color: var(--green); }
+  .t-loki:hover        { box-shadow: 0 4px 24px rgba(86,212,144,.12); }
+
+  .t-prom    { border-color:#1e3a5f; background:rgba(30,58,95,.14); }
+  .t-prom .card-name   { color: var(--blue); }
+  .t-prom .bul         { background: var(--blue); }
+  .t-prom .card-icon   { background: rgba(79,163,224,.12); color: var(--blue); }
+  .t-prom:hover        { box-shadow: 0 4px 24px rgba(79,163,224,.12); }
+
+  .t-tempo   { border-color:#5a2a1e; background:rgba(90,42,30,.14); }
+  .t-tempo .card-name  { color: var(--orange); }
+  .t-tempo .bul        { background: var(--orange); }
+  .t-tempo .card-icon  { background: rgba(245,146,78,.12); color: var(--orange); }
+  .t-tempo:hover       { box-shadow: 0 4px 24px rgba(245,146,78,.12); }
+
+  .t-grafana { border-color:#3a2e10; background:rgba(58,46,16,.18); }
+  .t-grafana .card-name { color: var(--yellow); }
+  .t-grafana .bul       { background: var(--yellow); }
+  .t-grafana .card-icon { background: rgba(245,215,105,.12); color: var(--yellow); }
+  .t-grafana:hover      { box-shadow: 0 4px 24px rgba(245,215,105,.12); }
+
+  .t-s3      { border-color:#3a2408; background:rgba(58,36,8,.14); }
+  .t-s3 .card-name     { color: #fb923c; }
+  .t-s3 .bul           { background: #fb923c; }
+  .t-s3 .card-icon     { background: rgba(251,146,60,.12); color: #fb923c; }
+  .t-s3:hover          { box-shadow: 0 4px 24px rgba(251,146,60,.1); }
+
+  /* OSS 배지 */
+  .oss-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; padding: 1px 6px; border-radius: 3px;
+    color: var(--green); border: 1px solid var(--green);
+    background: rgba(86,212,144,.07); letter-spacing:.04em;
+  }
+
+  /* ── 화살표 행 ── */
+  .arrow-row {
+    display: flex; align-items: center;
+    gap: 14px; height: 44px;
+  }
+  .arrow-spacer { width: 96px; flex-shrink: 0; }
+  .arrow-body {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    gap: 0;
+  }
+
+  /* 단일 화살표 */
+  .arr-single {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    flex: 1;
+  }
+  .arr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; color: var(--text-dim); letter-spacing:.06em;
+  }
+  .arr-line {
+    width: 1px; height: 20px;
+    background: linear-gradient(to bottom, transparent, var(--ac, #4fa3e0));
+    position: relative;
+  }
+  .arr-line::after {
+    content: '▼'; position: absolute;
+    bottom: -9px; left: -4px;
+    font-size: 8px; color: var(--ac, #4fa3e0);
+  }
+
+  /* 포크 화살표 */
+  .fork-row {
+    display: flex; align-items: flex-start;
+    padding-left: 110px;
+    height: 52px; gap: 0;
+  }
+  .fork-arm {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; padding-top: 4px;
+  }
+  .fork-arm-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing:.05em;
+  }
+  .fork-arm-line {
+    width: 1px; flex: 1; position: relative;
+  }
+  .fork-arm-line::before {
+    content: ''; position: absolute; top:0; left:0;
+    width:1px; height:100%;
+    background: linear-gradient(to bottom, var(--fc), rgba(0,0,0,0));
+    opacity: .6;
+  }
+  .fork-arm-line::after {
+    content: '▼'; position: absolute;
+    bottom: -9px; left: -4px;
+    font-size: 8px; color: var(--fc);
+  }
+
+  /* 역방향(위) 화살표 — S3 */
+  .arr-up {
+    display: flex; flex-direction: column-reverse;
+    align-items: center; gap: 3px; flex: 1;
+    padding: 4px 0;
+  }
+  .arr-up-line {
+    width: 1px; height: 20px;
+    background: linear-gradient(to top, transparent, var(--ac, #fb923c));
+    position: relative;
+  }
+  .arr-up-line::before {
+    content: '▲'; position: absolute;
+    top: -9px; left: -4px;
+    font-size: 8px; color: var(--ac, #fb923c);
+  }
+
+  /* ── 하단 S3 섹션 ── */
+  .storage-row {
+    display: flex; align-items: stretch;
+    gap: 14px;
+    animation: fadeUp .45s ease .52s both;
+  }
+
+  /* ── 구분선 레이블 ── */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 0 0 110px;
+    margin: 8px 0 4px;
+  }
+  .divider-line { flex:1; height:1px; background: var(--border); }
+  .divider-text {
+    font-family:'JetBrains Mono', monospace;
+    font-size: 9px; color: var(--text-dim); letter-spacing:.1em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+
+  /* 시그널 컬러 */
+  .sig-log   { color:var(--green);  border-color:var(--green);  background:rgba(86,212,144,.06); }
+  .sig-met   { color:var(--blue);   border-color:var(--blue);   background:rgba(79,163,224,.06); }
+  .sig-trc   { color:var(--orange); border-color:var(--orange); background:rgba(245,146,78,.06); }
+
+  /* ── 하단 노트 ── */
+  .notes {
+    margin-top: 44px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .note {
+    background: rgba(255,255,255,.02);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .note-title {
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--text-mid);
+    letter-spacing:.08em; margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .note-row {
+    display:flex; align-items:flex-start; gap:8px;
+    font-size: 12px; color: var(--text-mid); line-height:1.5;
+    margin-bottom: 4px;
+  }
+  .note-dot { width:4px; height:4px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+
+  /* protocol corner */
+  .corner {
+    position: absolute; top:10px; right:12px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 8px; color: var(--text-dim);
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.05);
+    padding: 1px 6px; border-radius: 3px;
+    letter-spacing:.06em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <p class="hdr-tag">3차 프로젝트 · Monitoring Architecture</p>
+  <h1 class="hdr-title">OSS 기반 통합 관측가능성 스택</h1>
+  <p class="hdr-sub">ADOT Collector → OSS Backends (Loki · Prometheus · Tempo) → Grafana</p>
+
+  <!-- 범례 -->
+  <div class="legend-bar">
+    <div class="leg">
+      <div class="leg-dot" style="background:var(--aws);border-radius:2px;"></div>
+      <span>AWS 관리형 (ADOT만 해당)</span>
+    </div>
+    <div class="leg">
+      <div class="leg-dot" style="background:var(--green);border-radius:2px;"></div>
+      <span>OSS — ECS Fargate 자체 운영</span>
+    </div>
+    <div class="leg" style="margin-left:auto;">
+      <span class="sig sig-log" style="border-radius:3px;">LOG</span>
+    </div>
+    <div class="leg">
+      <span class="sig sig-met" style="border-radius:3px;">METRIC</span>
+    </div>
+    <div class="leg">
+      <span class="sig sig-trc" style="border-radius:3px;">TRACE</span>
+    </div>
+  </div>
+
+  <!-- 다이어그램 -->
+  <div class="diagram">
+
+    <!-- ① 앱 레이어 -->
+    <div class="row">
+      <div class="row-label"><span>앱 코드</span></div>
+      <div class="row-body">
+        <div class="card t-app" style="flex:3;">
+          <span class="corner">ECS Fargate Task</span>
+          <div class="card-head">
+            <div class="card-icon">🧬</div>
+            <span class="card-name">APPLICATION</span>
+            <span class="oss-badge" style="margin-left:auto;">OSS SDK</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span>OTEL Python/Node SDK — Span 생성, Counter/Histogram 기록, 로그 컨텍스트 주입</span></div>
+            <div class="card-row"><span class="bul"></span><span>stdout 로그 → FireLens(Fluent Bit) 수집 → ADOT으로 전달</span></div>
+            <div class="card-row"><span class="bul"></span><span>메트릭·트레이스 → OTLP gRPC(4317)로 ADOT에 Push</span></div>
+          </div>
+          <div class="sig-row">
+            <span class="sig sig-log">LOG</span>
+            <span class="sig sig-met">METRIC</span>
+            <span class="sig sig-trc">TRACE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 화살표 A -->
+    <div class="arrow-row">
+      <div class="arrow-spacer"></div>
+      <div class="arrow-body">
+        <div class="arr-single">
+          <span class="arr-label">OTLP gRPC :4317 · stdout → FireLens(Fluent Bit)</span>
+          <div class="arr-line" style="--ac:var(--aws);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② ADOT Collector -->
+    <div class="row">
+      <div class="row-label"><span>Collector</span></div>
+      <div class="row-body">
+        <div class="card t-adot" style="flex:3;">
+          <span class="corner">AWS Distro for OTEL</span>
+          <div class="card-head">
+            <div class="card-icon">⚡</div>
+            <span class="card-name">ADOT COLLECTOR</span>
+            <span class="card-badge">AWS 관리형</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span><b style="color:var(--aws);">Receiver</b> — OTLP(로그·메트릭·트레이스) + Fluent Bit(로그) 동시 수신</span></div>
+            <div class="card-row"><span class="bul"></span><span><b style="color:var(--aws);">Processor</b> — batch(5s/512건), memory_limiter, resource attribute 태깅</span></div>
+            <div class="card-row"><span class="bul"></span><span><b style="color:var(--aws);">Exporter</b> — 신호별 OSS 백엔드로 분기 / Prometheus remote_write · loki HTTP · otlp(Tempo)</span></div>
+          </div>
+          <div class="sig-row">
+            <span class="sig sig-log">LOG</span>
+            <span class="sig sig-met">METRIC</span>
+            <span class="sig sig-trc">TRACE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 포크 화살표 -->
+    <div class="fork-row">
+      <div class="fork-arm">
+        <span class="fork-arm-label" style="color:var(--green);">Loki HTTP :3100</span>
+        <div class="fork-arm-line" style="--fc:var(--green);"></div>
+      </div>
+      <div class="fork-arm">
+        <span class="fork-arm-label" style="color:var(--blue);">remote_write :9090</span>
+        <div class="fork-arm-line" style="--fc:var(--blue);"></div>
+      </div>
+      <div class="fork-arm">
+        <span class="fork-arm-label" style="color:var(--orange);">OTLP gRPC :4317</span>
+        <div class="fork-arm-line" style="--fc:var(--orange);"></div>
+      </div>
+    </div>
+
+    <!-- ③ OSS 백엔드 3종 -->
+    <div class="row">
+      <div class="row-label"><span>백엔드</span></div>
+      <div class="row-body">
+
+        <div class="card t-loki">
+          <div class="card-head">
+            <div class="card-icon">📋</div>
+            <span class="card-name">LOKI</span>
+            <span class="oss-badge" style="margin-left:auto;">OSS</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span>로그 Chunk 압축·저장</span></div>
+            <div class="card-row"><span class="bul"></span><span>인덱스 → TSDB (label 기반)</span></div>
+            <div class="card-row"><span class="bul"></span><span>오래된 Chunk → S3 업로드</span></div>
+          </div>
+          <div class="sig-row"><span class="sig sig-log">LOG</span></div>
+        </div>
+
+        <div class="card t-prom">
+          <div class="card-head">
+            <div class="card-icon">📊</div>
+            <span class="card-name">PROMETHEUS</span>
+            <span class="oss-badge" style="margin-left:auto;">OSS</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span>remote_write 수신 → TSDB 저장</span></div>
+            <div class="card-row"><span class="bul"></span><span>로컬 EBS (단기) + S3 (장기)</span></div>
+            <div class="card-row"><span class="bul"></span><span>PromQL 쿼리 엔드포인트 제공</span></div>
+          </div>
+          <div class="sig-row"><span class="sig sig-met">METRIC</span></div>
+        </div>
+
+        <div class="card t-tempo">
+          <div class="card-head">
+            <div class="card-icon">🔗</div>
+            <span class="card-name">TEMPO</span>
+            <span class="oss-badge" style="margin-left:auto;">OSS</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span>Trace Block 수신·저장</span></div>
+            <div class="card-row"><span class="bul"></span><span>Block → S3 업로드</span></div>
+            <div class="card-row"><span class="bul"></span><span>TraceQL 쿼리 지원</span></div>
+          </div>
+          <div class="sig-row"><span class="sig sig-trc">TRACE</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- S3 업로드 화살표 (양옆) + 쿼리 화살표 (가운데) -->
+    <div style="display:flex; padding-left:110px; height:52px; gap:12px; align-items:flex-start;">
+
+      <!-- Loki → S3 -->
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding-top:4px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#fb923c;">→ S3 (Chunk)</span>
+        <div style="width:1px;flex:1;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:1px;height:100%;background:linear-gradient(to bottom,#fb923c,rgba(0,0,0,0));opacity:.5;"></div>
+          <span style="position:absolute;bottom:-9px;left:-4px;font-size:8px;color:#fb923c;">▼</span>
+        </div>
+      </div>
+
+      <!-- Prometheus → Grafana (쿼리) -->
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding-top:4px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--yellow);">Grafana 쿼리 (API)</span>
+        <div style="width:1px;flex:1;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:1px;height:100%;background:linear-gradient(to bottom,var(--yellow),rgba(0,0,0,0));opacity:.5;"></div>
+          <span style="position:absolute;bottom:-9px;left:-4px;font-size:8px;color:var(--yellow);">▼</span>
+        </div>
+      </div>
+
+      <!-- Tempo → S3 -->
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding-top:4px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#fb923c;">→ S3 (Block)</span>
+        <div style="width:1px;flex:1;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:1px;height:100%;background:linear-gradient(to bottom,#fb923c,rgba(0,0,0,0));opacity:.5;"></div>
+          <span style="position:absolute;bottom:-9px;left:-4px;font-size:8px;color:#fb923c;">▼</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ④ S3 + Grafana 나란히 -->
+    <div class="row" style="animation-delay:.44s;">
+      <div class="row-label"><span>스토리지 /\n시각화</span></div>
+      <div class="row-body">
+
+        <div class="card t-s3" style="flex:1;">
+          <div class="card-head">
+            <div class="card-icon">🪣</div>
+            <span class="card-name">S3</span>
+            <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 6px;border-radius:3px;color:var(--aws);border:1px solid var(--aws);background:rgba(245,158,11,.08);">AWS</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span>Loki Chunk 장기 보관</span></div>
+            <div class="card-row"><span class="bul"></span><span>Tempo Block 장기 보관</span></div>
+            <div class="card-row"><span class="bul"></span><span>Prometheus 장기 → 추후 Thanos 연동 가능</span></div>
+          </div>
+        </div>
+
+        <div class="card t-grafana" style="flex:2;">
+          <span class="corner">Dashboard / Explore / Alerting</span>
+          <div class="card-head">
+            <div class="card-icon">📈</div>
+            <span class="card-name">GRAFANA</span>
+            <span class="oss-badge" style="margin-left:auto;">OSS</span>
+          </div>
+          <div class="card-rows">
+            <div class="card-row"><span class="bul"></span><span><b style="color:var(--green);">LogQL</b> → Loki API 호출 — 컨테이너 로그 검색·필터링</span></div>
+            <div class="card-row"><span class="bul"></span><span><b style="color:var(--blue);">PromQL</b> → Prometheus API 호출 — CPU·메모리·요청률·에러율</span></div>
+            <div class="card-row"><span class="bul"></span><span><b style="color:var(--orange);">TraceQL</b> → Tempo API 호출 — Bedrock 멀티에이전트 호출 체인 시각화</span></div>
+            <div class="card-row"><span class="bul"></span><span>Alerting 내장 → Slack·Email 알림 (AlertManager 없이 Grafana 단독)</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end diagram -->
+
+  <!-- 하단 노트 -->
+  <div class="notes">
+    <div class="note">
+      <p class="note-title">설계 결정 이유</p>
+      <div class="note-row"><span class="note-dot" style="background:var(--aws);"></span><span>ADOT만 AWS 관리형으로 사용 — IAM IRSA 연동, OTEL upstream 호환성, ECS 사이드카 패턴 지원</span></div>
+      <div class="note-row"><span class="note-dot" style="background:var(--green);"></span><span>나머지 전부 OSS — 쿼리 문법(PromQL/LogQL/TraceQL) 직접 체득, 인프라 전문성 입증</span></div>
+      <div class="note-row"><span class="note-dot" style="background:var(--yellow);"></span><span>Grafana 알림 내장 활용 — AlertManager 별도 운영 오버헤드 없이 단일 UI에서 관리</span></div>
+    </div>
+    <div class="note">
+      <p class="note-title">트레이드오프</p>
+      <div class="note-row"><span class="note-dot" style="background:var(--orange);"></span><span>Prometheus EBS 단기 보관 → S3 장기 보관 분리 필요 (Thanos 미도입 시 직접 스크립트)</span></div>
+      <div class="note-row"><span class="note-dot" style="background:var(--red);"></span><span>OSS 백엔드 3종 ECS 운영 → HA 구성·패치·볼륨 관리 직접 책임</span></div>
+      <div class="note-row"><span class="note-dot" style="background:var(--blue);"></span><span>AMP 대비 비용 절감 가능하나 운영 오버헤드 증가 — 학습 목적에서는 이점</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
