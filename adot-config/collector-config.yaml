@@ -1,0 +1,235 @@
+# =============================================================================
+# ADOT Collector 설정 파일 — Phase 2 구현 템플릿
+#
+# 배포 방법 (Phase 2에서 구현):
+#   이 파일의 내용을 SSM Parameter Store에 저장합니다.
+#   ECS Task Definition의 secrets 블록에서 AOT_CONFIG_CONTENT 환경변수로 주입합니다.
+#
+#   저장 명령어:
+#     aws ssm put-parameter \
+#       --name "/supplement-rec/dev/adot-config" \
+#       --type "String" \
+#       --value "$(cat collector-config.yaml)" \
+#       --region ap-northeast-2
+#
+#   Task Definition secrets 블록:
+#     secrets:
+#       - name: AOT_CONFIG_CONTENT
+#         valueFrom: "arn:aws:ssm:ap-northeast-2:ACCOUNT_ID:parameter/supplement-rec/dev/adot-config"
+#
+# 환경변수 치환:
+#   ${AMP_WORKSPACE_ID}: ECS Task 환경변수에서 주입
+#   ${AWS_REGION}: ECS Task 환경변수에서 주입 (기본값: ap-northeast-2)
+# =============================================================================
+
+# =============================================================================
+# 수신기 (Receivers) — 데이터를 받아들이는 입력 지점
+# =============================================================================
+receivers:
+
+  # OTel SDK로 계측된 앱에서 메트릭/트레이스/로그를 수신합니다.
+  # 앱과 ADOT Sidecar는 같은 Task 내에서 localhost로 통신합니다.
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317  # 앱 → ADOT gRPC 통신
+      http:
+        endpoint: 0.0.0.0:4318  # gRPC 불가 환경을 위한 HTTP 폴백
+
+  # ECS Task 수준의 CPU, 메모리, 네트워크 메트릭을 자동 수집합니다.
+  # ECS Fargate 메타데이터 API를 사용합니다 (별도 권한 불필요).
+  awsecscontainermetrics:
+    collection_interval: 20s  # 20초마다 수집
+
+# =============================================================================
+# 처리기 (Processors) — 수집된 데이터를 변환/필터링
+# =============================================================================
+processors:
+
+  # 메모리 사용량을 제한합니다. ADOT Sidecar의 OOM(Out of Memory) 방지.
+  # Task 메모리 할당: 512MiB → limit_mib: 200으로 여유를 남깁니다.
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 200       # 200MiB 초과 시 새 데이터 거부 시작
+    spike_limit_mib: 50  # 순간 급증 허용 범위
+
+  # 데이터를 배치로 모아서 전송합니다. 네트워크 요청 수와 비용을 줄입니다.
+  batch:
+    timeout: 5s              # 최대 5초 대기 후 강제 전송
+    send_batch_size: 512     # 512개 단위로 배치 전송
+    send_batch_max_size: 1024
+
+  # 리소스 속성을 추가/수정합니다. 서비스 식별에 사용됩니다.
+  resource:
+    attributes:
+      - key: service.name
+        value: "supplement-recommendation"
+        action: upsert
+      - key: deployment.environment
+        action: upsert
+        # 환경변수에서 값을 읽어올 수 없는 경우 "unknown"으로 기본값 설정
+        value: "${env:ENVIRONMENT:-unknown}"
+
+  # [보안] 민감한 속성을 삭제합니다.
+  # OTel SDK auto-instrumentation은 HTTP 헤더와 쿼리 파라미터를 자동으로 수집합니다.
+  # 건강 설문 응답, 생년월일 등 PII(개인식별정보)가 포함될 수 있어 반드시 필터링하세요.
+  #
+  # [주의] 아래 패턴은 예시입니다. 실제 앱의 파라미터 이름을 확인하고 조정하세요.
+  attributes/delete_pii:
+    actions:
+      # HTTP 쿼리 파라미터에서 민감 필드 삭제
+      - key: http.request.query.health_survey
+        action: delete
+      - key: http.request.query.birth_date
+        action: delete
+      - key: http.request.query.gender
+        action: delete
+      # HTTP 요청 바디는 기본적으로 수집되지 않지만 명시적으로 삭제
+      - key: http.request.body
+        action: delete
+      # 사용자 ID를 trace에서 제거 (카디널리티 + 개인정보)
+      # Exemplar 방식으로 AMP에 전달하는 것을 권장합니다.
+      - key: user.id
+        action: delete
+
+  # [선택] Tail-based Sampling — 요청 완료 후 에러 여부를 보고 샘플링 결정
+  # 에러 요청 100% + 정상 요청 5% 수집
+  # 메모리 사용량이 약 50MB 추가됩니다.
+  #
+  # [주의] tail_sampling processor는 traces 파이프라인에서만 사용 가능합니다.
+  # 모든 span이 이 processor를 통과해야 하므로 단일 ADOT 인스턴스에서만 동작합니다.
+  # 여러 ECS Task가 있는 경우 각 Task의 ADOT Sidecar가 독립적으로 판단합니다.
+  # (분산 Tail Sampling은 OpenTelemetry Collector 별도 인스턴스 필요)
+  tail_sampling:
+    decision_wait: 10s  # span 완료 후 10초 대기 (긴 요청 포함)
+    num_traces: 50000   # 메모리에 유지할 최대 trace 수
+    expected_new_traces_per_sec: 10
+    policies:
+      # 에러가 발생한 요청은 100% 수집
+      - name: errors-policy
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      # 레이턴시가 높은 요청 100% 수집 (2000ms 이상)
+      - name: high-latency-policy
+        type: latency
+        latency:
+          threshold_ms: 2000
+      # 추천 API는 10% 수집
+      - name: recommendation-api-policy
+        type: string_attribute
+        string_attribute:
+          key: http.route
+          values: ["/api/v1/recommend"]
+          enabled_regex_matching: true
+        # 이 policy 내에서 10% 확률 샘플링을 적용하려면 composite policy를 사용하세요.
+        # composite policy는 여러 정책을 결합합니다.
+      # 나머지 정상 요청 5% 수집
+      - name: default-policy
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 5
+
+# =============================================================================
+# 내보내기 (Exporters) — 처리된 데이터를 AWS 서비스로 전송
+# =============================================================================
+exporters:
+
+  # 메트릭 → AMP (Amazon Managed Prometheus)
+  # SigV4 인증으로 ADOT Task Role의 aps:RemoteWrite 권한을 사용합니다.
+  prometheusremotewrite:
+    endpoint: "https://aps-workspaces.${env:AWS_REGION}.amazonaws.com/workspaces/${env:AMP_WORKSPACE_ID}/api/v1/remote_write"
+    auth:
+      authenticator: sigv4auth
+    # 전송 실패 시 재시도 설정
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s  # 5분 안에 재시도 포기
+    # 헤더 최적화
+    headers:
+      X-Prometheus-Remote-Write-Version: "0.1.0"
+
+  # 트레이스 → AWS X-Ray
+  # ADOT Task Role의 xray:PutTraceSegments 권한을 사용합니다.
+  awsxray:
+    region: ${env:AWS_REGION}
+    # 로컬 모드: true이면 X-Ray 데몬(포트 2000)으로 전송. false이면 직접 API 호출.
+    # Fargate에서는 X-Ray 데몬 없이 직접 API 호출하므로 false.
+    local_mode: false
+    # 버퍼 크기 (메모리 사용량 조절)
+    max_retries: 2
+
+  # 로그 → CloudWatch Logs
+  # ADOT Task Role의 logs:CreateLogStream, logs:PutLogEvents 권한을 사용합니다.
+  awscloudwatchlogs:
+    log_group_name: "/ecs/supplement-rec-${env:ENVIRONMENT:-dev}"
+    log_stream_name: "adot-logs/{instance_id}"
+    region: ${env:AWS_REGION}
+    # 로그 이벤트 포맷
+    log_format: json
+
+  # 디버깅용 — 개발 환경에서만 사용. ADOT 표준 출력에 데이터를 출력합니다.
+  # 운영 환경에서는 반드시 제거하거나 service.pipelines에서 제외하세요.
+  logging:
+    verbosity: basic  # basic / normal / detailed
+
+# =============================================================================
+# 확장 (Extensions) — SigV4 인증 등 보조 기능
+# =============================================================================
+extensions:
+
+  # SigV4 인증: ADOT Task Role을 사용하여 AWS API 요청에 서명합니다.
+  sigv4auth:
+    region: ${env:AWS_REGION}
+    service: "aps"  # AMP 서비스 식별자
+
+  # 헬스체크 엔드포인트: ALB/ECS 헬스체크가 이 포트로 ADOT 상태를 확인합니다.
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: "/"
+
+  # pprof: 성능 프로파일링 (개발 환경 디버깅용)
+  # pprof:
+  #   endpoint: 0.0.0.0:1777
+
+# =============================================================================
+# 서비스 파이프라인 — 리시버 → 프로세서 → 익스포터 연결
+# =============================================================================
+service:
+
+  extensions: [sigv4auth, health_check]
+
+  pipelines:
+
+    # 메트릭 파이프라인
+    # 앱 OTel 메트릭 + ECS 컨테이너 메트릭 → AMP
+    metrics:
+      receivers: [otlp, awsecscontainermetrics]
+      processors: [memory_limiter, batch, resource, attributes/delete_pii]
+      exporters: [prometheusremotewrite]
+
+    # 트레이스 파이프라인
+    # 앱 OTel 트레이스 → Tail Sampling → X-Ray
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, tail_sampling, resource, attributes/delete_pii]
+      exporters: [awsxray]
+
+    # 로그 파이프라인
+    # 앱 OTel 로그 → CloudWatch Logs
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes/delete_pii]
+      exporters: [awscloudwatchlogs]
+
+  # ADOT 내부 텔레메트리 (ADOT 자체의 메트릭/로그)
+  # ADOT 익스포터 오류를 CloudWatch Logs에서 감지할 수 있습니다.
+  telemetry:
+    logs:
+      level: "warn"  # info / warn / error (운영: warn 권장)
+      output_paths: ["stdout"]
+    metrics:
+      level: "basic"
+      address: "0.0.0.0:8888"
