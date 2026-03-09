@@ -80,7 +80,7 @@ resource "aws_ecs_task_definition" "app" {
           # 트레이스 전파 형식. AWS X-Ray와 호환되는 xray 형식 사용
           # W3C TraceContext도 함께 설정하면 외부 서비스와 트레이스 연계 가능
           name  = "OTEL_PROPAGATORS"
-          value = "xray,tracecontext,baggage"
+          value = "tracecontext,baggage"
         },
         {
           name  = "OTEL_RESOURCE_ATTRIBUTES"
