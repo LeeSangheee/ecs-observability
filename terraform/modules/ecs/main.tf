@@ -103,7 +103,7 @@ resource "aws_lb" "main" {
 
 # Target Group — ALB가 ECS Task의 app 포트로 트래픽을 전달합니다.
 resource "aws_lb_target_group" "app" {
-  name        = "${var.project}-${var.environment}-tg"
+  name_prefix = "svc-"
   port        = var.app_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -126,6 +126,12 @@ resource "aws_lb_target_group" "app" {
   tags = merge(var.tags, {
     Name = "${var.project}-${var.environment}-tg"
   })
+
+  # 포트 변경 시 새 Target Group을 먼저 생성한 후 기존 것을 삭제합니다.
+  # Listener가 먼저 새 Target Group으로 교체되므로 ResourceInUse 오류를 방지합니다.
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ALB HTTP Listener (포트 80)

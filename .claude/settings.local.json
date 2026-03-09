@@ -4,7 +4,16 @@
       "Bash(do echo:*)",
       "Bash(grep:*)",
       "Bash(wc:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(terraform plan:*)",
+      "Bash(terraform apply:*)",
+      "Bash(aws ecs:*)",
+      "Bash(aws logs:*)",
+      "Bash(MSYS_NO_PATHCONV=1 aws logs:*)",
+      "Bash(MSYS_NO_PATHCONV=1 aws ecs:*)"
     ]
   }
 }

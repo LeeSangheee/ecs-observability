@@ -124,7 +124,9 @@ module "ecs" {
   private_subnet_ids = module.networking.private_subnet_ids
 
   # 애플리케이션 설정
-  app_image = var.app_image
+  # ECR 레포지토리 URL은 ecr.tf에서 생성한 aws_ecr_repository.app을 참조합니다.
+  # GitHub Actions가 :latest 태그로 푸시하고 ECS Service를 재배포합니다.
+  app_image = "${aws_ecr_repository.app.repository_url}:latest"
   app_port  = var.app_port
 
   # ECS 서비스 스케일링

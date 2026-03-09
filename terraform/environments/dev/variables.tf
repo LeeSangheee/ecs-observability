@@ -23,15 +23,10 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "app_image" {
-  description = "애플리케이션 컨테이너 이미지 URI"
-  type        = string
-}
-
 variable "app_port" {
   description = "애플리케이션 포트"
   type        = number
-  default     = 8080
+  default     = 8000
 }
 
 variable "create_amp_endpoint" {

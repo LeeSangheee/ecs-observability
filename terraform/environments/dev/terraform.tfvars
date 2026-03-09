@@ -13,12 +13,7 @@ region      = "ap-northeast-2"
 environment = "dev"
 project     = "supplement-rec"
 
-# 실제 앱 이미지 빌드 전 임시 이미지
-# Phase 2에서 ECR URI로 교체하세요.
-# 예: 123456789012.dkr.ecr.ap-northeast-2.amazonaws.com/supplement-rec:latest
-app_image = "nginx:latest"
-
-app_port = 8080
+app_port = 8000
 
 # AMP(aps-workspaces) VPC Interface Endpoint 생성 여부
 # 서울 리전(ap-northeast-2) 지원 확인 명령어:
