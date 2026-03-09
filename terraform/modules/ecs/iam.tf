@@ -23,7 +23,7 @@
 # -----------------------------------------------------------------------------
 resource "aws_iam_role" "task_execution" {
   name        = "${var.project}-${var.environment}-ecs-task-execution-role"
-  description = "ECS Task Execution Role — ECR Pull, CloudWatch Logs 쓰기, SSM 읽기"
+  description = "ECS Task Execution Role - ECR pull, CloudWatch Logs write, SSM read"
 
   # ECS Tasks 서비스가 이 Role을 Assume할 수 있도록 허용
   assume_role_policy = jsonencode({

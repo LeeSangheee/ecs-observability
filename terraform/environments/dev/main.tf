@@ -134,8 +134,9 @@ module "ecs" {
 
   # observability 모듈 출력값
   # ADOT Sidecar의 Task Role ARN (X-Ray, AMP, CloudWatch Logs 권한 포함)
-  amp_workspace_id   = module.observability.amp_workspace_id
-  adot_task_role_arn = module.observability.adot_task_role_arn
+  amp_workspace_id    = module.observability.amp_workspace_id
+  adot_task_role_arn  = module.observability.adot_task_role_arn
+  adot_config_ssm_arn = module.observability.adot_config_ssm_arn
 
   tags = local.common_tags
 }

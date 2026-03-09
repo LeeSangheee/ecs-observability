@@ -15,11 +15,11 @@
 # ALB 보안 그룹 — 인터넷에서 HTTP/HTTPS 트래픽을 수신합니다.
 resource "aws_security_group" "alb" {
   name        = "${var.project}-${var.environment}-alb-sg"
-  description = "ALB 보안 그룹 — 인터넷에서 HTTP(80) 및 HTTPS(443) 수신"
+  description = "ALB security group - HTTP(80) and HTTPS(443) ingress from internet"
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "HTTP 트래픽 수신 (HTTPS 리다이렉트 목적)"
+    description = "HTTP ingress (for HTTPS redirect)"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -27,7 +27,7 @@ resource "aws_security_group" "alb" {
   }
 
   ingress {
-    description = "HTTPS 트래픽 수신"
+    description = "HTTPS ingress"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -35,7 +35,7 @@ resource "aws_security_group" "alb" {
   }
 
   egress {
-    description = "ECS Task로의 아웃바운드 트래픽 허용"
+    description = "Allow all outbound to ECS tasks"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -50,11 +50,11 @@ resource "aws_security_group" "alb" {
 # ECS Task 보안 그룹 — ALB에서 오는 트래픽만 수신합니다.
 resource "aws_security_group" "ecs_tasks" {
   name        = "${var.project}-${var.environment}-ecs-tasks-sg"
-  description = "ECS Task 보안 그룹 — ALB에서 오는 트래픽만 허용"
+  description = "ECS Task security group - allow traffic from ALB only"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "ALB에서 App 포트로 트래픽 허용"
+    description     = "Allow traffic from ALB to app port"
     from_port       = var.app_port
     to_port         = var.app_port
     protocol        = "tcp"
@@ -63,7 +63,7 @@ resource "aws_security_group" "ecs_tasks" {
 
   # ECS Task → AWS 서비스 아웃바운드 (VPC Endpoint 또는 NAT GW 경유)
   egress {
-    description = "모든 아웃바운드 허용 (ECR Pull, AWS API 호출 등)"
+    description = "Allow all outbound (ECR pull, AWS API calls, etc.)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

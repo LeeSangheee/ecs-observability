@@ -14,7 +14,7 @@
 #   3. AMP, CloudWatch, X-Ray 데이터소스 연결
 # =============================================================================
 
-resource "aws_amp_workspace" "main" {
+resource "aws_prometheus_workspace" "main" {
   alias = "${var.project}-${var.environment}"
 
   # KMS 암호화 (선택사항 — 운영 환경에서 권장)
@@ -39,9 +39,9 @@ resource "aws_amp_workspace" "main" {
 # [주의] aws_amp_rule_group_namespace 리소스는 전체 YAML을 한 번에 관리합니다.
 # 규칙을 수정하면 전체 네임스페이스가 교체됩니다.
 # =============================================================================
-resource "aws_amp_rule_group_namespace" "sli_recording_rules" {
+resource "aws_prometheus_rule_group_namespace" "sli_recording_rules" {
   name         = "sli-recording-rules"
-  workspace_id = aws_amp_workspace.main.id
+  workspace_id = aws_prometheus_workspace.main.id
 
   # YAML 형식의 Prometheus Recording Rules
   data = <<-YAML

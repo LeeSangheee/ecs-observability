@@ -190,11 +190,11 @@ resource "aws_route_table_association" "private" {
 # 프라이빗 서브넷에서 HTTPS(443)로 접근하는 트래픽만 허용합니다.
 resource "aws_security_group" "vpc_endpoints" {
   name        = "${var.project}-${var.environment}-vpc-endpoints-sg"
-  description = "VPC Interface Endpoints 보안 그룹 — 프라이빗 서브넷에서 HTTPS만 허용"
+  description = "VPC Interface Endpoints security group - HTTPS only from private subnets"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "VPC 내부에서 HTTPS 트래픽 허용 (ECS Task → VPC Endpoint)"
+    description = "Allow HTTPS from within VPC (ECS Task to VPC Endpoint)"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -204,7 +204,7 @@ resource "aws_security_group" "vpc_endpoints" {
   # VPC Endpoint는 아웃바운드 트래픽을 허용할 필요가 없습니다.
   # (Endpoint가 AWS 서비스로 요청을 프록시하는 방향은 이 SG 아웃바운드와 무관)
   egress {
-    description = "모든 아웃바운드 허용"
+    description = "Allow all outbound"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

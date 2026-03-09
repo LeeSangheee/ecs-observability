@@ -112,6 +112,11 @@ variable "adot_task_role_arn" {
   type        = string
 }
 
+variable "adot_config_ssm_arn" {
+  description = "ADOT collector config SSM Parameter ARN (AOT_CONFIG_CONTENT 주입에 사용)"
+  type        = string
+}
+
 # task_execution_role_arn은 이 모듈(iam.tf)에서 직접 생성합니다.
 # 외부에서 주입받지 않으며, task-definition.tf에서 aws_iam_role.task_execution.arn으로 참조합니다.
 

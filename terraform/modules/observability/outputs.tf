@@ -4,17 +4,22 @@
 
 output "amp_workspace_id" {
   description = "AMP Workspace ID"
-  value       = aws_amp_workspace.main.id
+  value       = aws_prometheus_workspace.main.id
+}
+
+output "adot_config_ssm_arn" {
+  description = "ADOT config SSM Parameter ARN (ECS Task Definition secrets injection)"
+  value       = aws_ssm_parameter.adot_config.arn
 }
 
 output "amp_workspace_arn" {
   description = "AMP Workspace ARN (IAM 정책 리소스 지정에 사용)"
-  value       = aws_amp_workspace.main.arn
+  value       = aws_prometheus_workspace.main.arn
 }
 
 output "amp_workspace_endpoint" {
   description = "AMP Remote Write Endpoint (ADOT 설정에서 사용)"
-  value       = aws_amp_workspace.main.prometheus_endpoint
+  value       = aws_prometheus_workspace.main.prometheus_endpoint
 }
 
 output "adot_task_role_arn" {

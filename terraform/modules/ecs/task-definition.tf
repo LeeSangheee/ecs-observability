@@ -172,28 +172,24 @@ resource "aws_ecs_task_definition" "app" {
         }
       ]
 
-      # ADOT 설정 파일 경로 지정
-      # AWS 공식 ECS용 사전 정의 설정 파일을 사용합니다.
-      # 커스텀 설정이 필요하면 AOT_CONFIG_CONTENT 환경변수로 YAML 내용을 직접 주입하거나
-      # SSM Parameter Store에서 읽어오는 방식을 사용하세요. (Phase 2 구현 예정)
-      command = ["--config=/etc/ecs/ecs-default-config.yaml"]
+      # SSM Parameter Store에서 ADOT 설정을 읽어 AOT_CONFIG_CONTENT 환경변수로 주입합니다.
+      # 설정 변경 시 이미지 재빌드 없이 SSM 값만 수정 후 ECS Service 재배포하면 됩니다.
+      command = ["--config=env:AOT_CONFIG_CONTENT"]
 
       environment = [
         {
           # AWS 리전 명시 (ADOT SDK가 SigV4 서명 시 사용)
           name  = "AWS_REGION"
           value = var.region
-        },
+        }
+      ]
+
+      # SSM Parameter Store에서 ADOT 설정 YAML을 AOT_CONFIG_CONTENT로 주입
+      # Task Execution Role에 ssm:GetParameters 권한이 있어야 합니다. (iam.tf에서 부여됨)
+      secrets = [
         {
-          # [Phase 2 안내]
-          # AOT_CONFIG_CONTENT 환경변수로 YAML 설정 내용을 직접 주입할 수 있습니다.
-          # SSM Parameter Store에 YAML 내용을 저장한 뒤, Task Definition secrets 블록으로 주입하세요.
-          # 예시:
-          # secrets = [{ name = "AOT_CONFIG_CONTENT", valueFrom = "arn:aws:ssm:...:parameter/..." }]
-          #
-          # 현재는 AMP Remote Write Endpoint를 환경변수로 전달합니다.
-          name  = "AMP_WORKSPACE_ID"
-          value = var.amp_workspace_id
+          name      = "AOT_CONFIG_CONTENT"
+          valueFrom = var.adot_config_ssm_arn
         }
       ]
 

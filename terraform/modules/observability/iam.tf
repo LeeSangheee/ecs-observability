@@ -14,7 +14,7 @@
 # ECS Task 내 컨테이너(App + ADOT Sidecar)가 AWS API를 호출할 때 이 Role이 사용됩니다.
 resource "aws_iam_role" "adot_task" {
   name        = "${var.project}-${var.environment}-adot-task-role"
-  description = "ADOT Sidecar Task Role — AMP/X-Ray/CloudWatch Logs 최소 권한"
+  description = "ADOT Sidecar Task Role - minimal permissions for AMP/X-Ray/CloudWatch Logs"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -53,7 +53,7 @@ resource "aws_iam_role_policy" "adot_amp" {
           "aps:RemoteWrite"
         ]
         # 특정 AMP Workspace만 허용 (최소 권한 원칙)
-        Resource = aws_amp_workspace.main.arn
+        Resource = aws_prometheus_workspace.main.arn
       }
     ]
   })

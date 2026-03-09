@@ -23,7 +23,7 @@
 # 샘플 비율: 10% (정상 트래픽 기준, 에러는 Phase 2 ADOT 설정으로 100% 수집)
 # -----------------------------------------------------------------------------
 resource "aws_xray_sampling_rule" "recommendation_api" {
-  rule_name      = "${var.project}-${var.environment}-recommendation-api"
+  rule_name      = "${var.project}-${var.environment}-rec-api"
   priority       = 100
   version        = 1
 
