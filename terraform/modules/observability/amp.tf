@@ -55,7 +55,7 @@ resource "aws_prometheus_rule_group_namespace" "sli_recording_rules" {
           # 초당 요청 수 (엔드포인트별)
           - record: job:http_requests_total:rate5m
             expr: |
-              sum by (job, http_method, http_route, http_status_code) (
+              sum by (job, http_method, http_target, http_status_code) (
                 rate(http_server_duration_milliseconds_count[5m])
               )
 
@@ -121,7 +121,7 @@ resource "aws_prometheus_rule_group_namespace" "sli_recording_rules" {
             expr: |
               histogram_quantile(0.99,
                 sum by (job, le) (
-                  rate(http_server_duration_milliseconds_bucket{http_route=~"/api/v1/recommend.*"}[5m])
+                  rate(http_server_duration_milliseconds_bucket{http_target=~"/api/v1/recommend.*"}[5m])
                 )
               )
 

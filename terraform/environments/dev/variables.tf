@@ -41,6 +41,18 @@ variable "alarm_email" {
   default     = ""
 }
 
+variable "database_url" {
+  description = "애플리케이션 데이터베이스 URL"
+  type        = string
+  sensitive   = true
+}
+
+variable "jwt_secret_key" {
+  description = "JWT 서명 키"
+  type        = string
+  sensitive   = true
+}
+
 variable "alarm_slack_webhook_url" {
   description = "Slack Webhook URL (빈 문자열이면 미설정)"
   type        = string

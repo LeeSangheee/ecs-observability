@@ -67,6 +67,14 @@ resource "aws_ecs_task_definition" "app" {
       # 환경변수
       environment = [
         {
+          name  = "DATABASE_URL"
+          value = var.database_url
+        },
+        {
+          name  = "JWT_SECRET_KEY"
+          value = var.jwt_secret_key
+        },
+        {
           # ADOT Sidecar는 같은 Task 내에서 localhost로 통신
           # awsvpc 네트워크 모드에서 컨테이너 간 localhost 공유
           name  = "OTEL_EXPORTER_OTLP_ENDPOINT"

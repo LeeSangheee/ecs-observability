@@ -29,6 +29,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -129,6 +133,10 @@ module "ecs" {
   app_image = "${aws_ecr_repository.app.repository_url}:latest"
   app_port  = var.app_port
 
+  # 앱 환경변수
+  database_url   = var.database_url
+  jwt_secret_key = var.jwt_secret_key
+
   # ECS 서비스 스케일링
   desired_count = 2
   min_count     = 1
@@ -185,4 +193,15 @@ output "ecs_cluster_name" {
 output "task_definition_arn" {
   description = "ECS Task Definition ARN"
   value       = module.ecs.task_definition_arn
+}
+
+# Phase 3: AMG
+output "grafana_url" {
+  description = "AMG 대시보드 URL"
+  value       = module.observability.grafana_endpoint
+}
+
+output "grafana_workspace_id" {
+  description = "AMG Workspace ID"
+  value       = module.observability.grafana_workspace_id
 }

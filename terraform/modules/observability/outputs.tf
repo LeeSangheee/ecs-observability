@@ -46,3 +46,21 @@ output "adot_log_group_name" {
   description = "ADOT Sidecar CloudWatch Log Group 이름"
   value       = aws_cloudwatch_log_group.adot.name
 }
+
+# -----------------------------------------------------------------------------
+# Phase 3: AMG (Amazon Managed Grafana)
+# -----------------------------------------------------------------------------
+output "grafana_workspace_id" {
+  description = "AMG Workspace ID"
+  value       = aws_grafana_workspace.main.id
+}
+
+output "grafana_endpoint" {
+  description = "AMG Workspace URL (브라우저에서 접속)"
+  value       = "https://${aws_grafana_workspace.main.endpoint}"
+}
+
+output "grafana_role_arn" {
+  description = "AMG Workspace IAM Role ARN"
+  value       = aws_iam_role.grafana.arn
+}

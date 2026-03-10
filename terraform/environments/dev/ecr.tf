@@ -6,7 +6,7 @@
 # =============================================================================
 
 resource "aws_ecr_repository" "app" {
-  name                 = "svc-mypage"
+  name                 = "codecaine-python-mypage"
   image_tag_mutability = "MUTABLE" # :latest 태그 덮어쓰기 허용
 
   image_scanning_configuration {
@@ -14,7 +14,7 @@ resource "aws_ecr_repository" "app" {
   }
 
   tags = merge(local.common_tags, {
-    Name = "svc-mypage"
+    Name = "codecaine-python-mypage"
   })
 }
 

@@ -15,3 +15,6 @@ crash.*.log
 
 # Lock file는 커밋 권장 (공식 가이드라인)
 # .terraform.lock.hcl
+
+# Lambda build artifacts
+**/.build/

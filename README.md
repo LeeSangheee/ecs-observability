@@ -2,7 +2,7 @@
 
 ## 1. 프로젝트 개요
 
-영양제 추천 서비스(`svc-mypage`) ECS Fargate 위에 **AWS 관리형 서비스**로 관측가능성(Observability) 환경을 구축합니다.
+영양제 추천 서비스(`codecaine-python-mypage`) ECS Fargate 위에 **AWS 관리형 서비스**로 관측가능성(Observability) 환경을 구축합니다.
 단순 지표 수집이 아닌, **의미 있는 비즈니스/운영 지표**를 관측하는 것이 핵심 목표입니다.
 
 ### 기술 스택
@@ -14,6 +14,7 @@
 | 트레이스 | AWS X-Ray |
 | 시각화 | AMG (Amazon Managed Grafana) |
 | 수집기 | ADOT Sidecar (ECS Task 내) |
+| 알림 | SNS + Lambda → Slack |
 | IaC | Terraform |
 | CI/CD | GitHub Actions (OIDC) |
 
@@ -35,7 +36,7 @@ ALB
 │                                     │
 │  ┌──────────────┐  ┌─────────────┐  │
 │  │  App Container│  │ADOT Sidecar │  │
-│  │  (svc-mypage) │──▶│  Collector  │  │
+│  │  (mypage)     │──▶│  Collector  │  │
 │  │  OTel SDK 계측│  │             │  │
 │  └──────────────┘  └──────┬──────┘  │
 └─────────────────────────── ┼ ───────┘
@@ -47,7 +48,11 @@ ALB
                └─────────────┼─────────────┘
                              ▼
                       AMG (Grafana)
-                       통합 시각화 (예정)
+                       통합 시각화
+                             │
+                             ▼
+                    SNS → Lambda → Slack
+                       알림 전송
 ```
 
 ### 네트워크 구성
@@ -100,8 +105,20 @@ ecs-observability/
 │   └── modules/
 │       ├── networking/              # VPC, Subnet, NAT GW, VPC Endpoints, ALB
 │       ├── ecs/                     # ECS Cluster, Service, Task Definition, IAM
-│       └── observability/           # AMP, X-Ray, CloudWatch, SSM, SNS
-└── .gitignore                       # .terraform/, tfstate 제외
+│       └── observability/
+│           ├── amp.tf               # AMP Workspace + Recording Rules
+│           ├── cloudwatch.tf        # Log Groups + Metric Filters
+│           ├── grafana.tf           # AMG Workspace + IAM Role
+│           ├── iam.tf               # ADOT Task Role
+│           ├── slack.tf             # SNS → Lambda → Slack 알림
+│           ├── sns.tf               # SNS Topic
+│           ├── ssm.tf               # ADOT Config (SSM Parameter Store)
+│           ├── xray.tf              # X-Ray Sampling Rules
+│           ├── dashboards/
+│           │   └── golden-signals.json  # Golden Signals 대시보드
+│           └── lambda/
+│               └── slack_notifier.py    # Slack 알림 Lambda
+└── .gitignore
 ```
 
 ---
@@ -123,16 +140,17 @@ ecs-observability/
 ### Phase 2 — 앱 계측 + CI/CD ✅
 
 - [x] OTel SDK 앱 통합 (FastAPI, SQLAlchemy, HTTPX 자동 계측)
-- [x] ECR 레포지토리 생성 (`svc-mypage`)
+- [x] ECR 레포지토리 생성 (`codecaine-python-mypage`)
 - [x] GitHub Actions CI/CD 파이프라인 (OIDC 기반 AWS 인증)
 - [x] ECS 배포 자동화 (push to main → ECR push → ECS 재배포)
 
-### Phase 3 — 대시보드 (예정)
+### Phase 3 — 대시보드 + 알림 ✅
 
-- [ ] AMG Workspace 생성
-- [ ] AMP 데이터소스 연결
-- [ ] Golden Signals 대시보드
-- [ ] SLI/SLO 대시보드
+- [x] AMG Workspace 생성 (SERVICE_MANAGED 인증)
+- [x] AMP / CloudWatch / X-Ray 데이터소스 연결
+- [x] Golden Signals 대시보드 (Latency, Traffic, Errors, Saturation)
+- [x] AMP Recording Rules (RPS, 에러율, P99/P95/P50, Error Budget)
+- [x] SNS → Lambda → Slack 알림 구조 (Webhook URL 설정 시 활성화)
 
 ---
 
@@ -142,13 +160,19 @@ ecs-observability/
 
 ```bash
 cd terraform/environments/dev
+
+# 환경변수 설정 (민감 정보)
+export TF_VAR_database_url="postgresql+asyncpg://user:pass@host:5432/dbname"
+export TF_VAR_jwt_secret_key="your-secret-key"
+# (선택) export TF_VAR_alarm_slack_webhook_url="https://hooks.slack.com/..."
+
 terraform init
 terraform apply
 ```
 
 ### 앱 배포 (자동)
 
-`svc-mypage` 레포 `main` 브랜치에 push하면 GitHub Actions가 자동으로 실행됩니다.
+`codecaine-python-mypage` 레포 `main` 브랜치에 push하면 GitHub Actions가 자동으로 실행됩니다.
 
 ```
 push to main
@@ -179,10 +203,11 @@ aws ecs update-service \
 
 | 리소스 | 값 |
 |--------|-----|
-| ALB URL | `http://supplement-rec-dev-alb-2139117748.ap-northeast-2.elb.amazonaws.com` |
-| AMP Workspace | `ws-575a1e7d-fc5e-4783-b009-7b680150cedd` |
+| ALB URL | `http://supplement-rec-dev-alb-608069140.ap-northeast-2.elb.amazonaws.com` |
+| AMP Workspace | `ws-afb01eed-4de6-4039-9591-b601028be501` |
+| AMG (Grafana) URL | `https://g-30ff265d81.grafana-workspace.ap-northeast-2.amazonaws.com` |
 | ECS Cluster | `supplement-rec-dev` |
-| ECR Repository | `284484063229.dkr.ecr.ap-northeast-2.amazonaws.com/svc-mypage` |
+| ECR Repository | `349132805116.dkr.ecr.ap-northeast-2.amazonaws.com/codecaine-python-mypage` |
 
 ---
 
@@ -197,16 +222,24 @@ aws ecs update-service \
 - **해결**: `name_prefix` + `lifecycle { create_before_destroy = true }` 적용
 
 ### T3. ECS Task 기동 실패 — ModuleNotFoundError
-- **원인**: `opentelemetry-propagator-aws-xray` 패키지가 설치되어 있지만 직접 import 경로(`opentelemetry.propagators.aws.xray`)를 사용한 코드가 문제
+- **원인**: `opentelemetry-propagator-aws-xray` 패키지가 설치되어 있지만 직접 import 경로를 사용한 코드가 문제
 - **해결**: 직접 import 제거. 패키지는 `OTEL_PROPAGATORS` 환경변수 entry point로만 사용
 
 ### T4. ECS Task 기동 실패 — Propagator xray not found
 - **원인**: T3 해결 과정에서 패키지를 requirements.txt에서 제거했더니 `OTEL_PROPAGATORS=xray,tracecontext,baggage` 환경변수가 xray propagator를 못 찾음
-- **해결**: `OTEL_PROPAGATORS`에서 `xray` 제거 → `tracecontext,baggage`로 변경 (terraform apply)
+- **해결**: `OTEL_PROPAGATORS`에서 `xray` 제거 → `tracecontext,baggage`로 변경
 
 ### T5. ECS Task 헬스체크 실패
-- **원인**: `python:3.11-slim` 이미지에 `curl`이 없어 헬스체크 커맨드(`curl -sf http://localhost:8000/health`) 실패
+- **원인**: `python:3.11-slim` 이미지에 `curl`이 없어 헬스체크 커맨드 실패
 - **해결**: Dockerfile에 `RUN apt-get install -y curl` 추가
+
+### T6. 계정 전환 후 ECS Task 실패 — 환경변수 누락
+- **원인**: 새 계정 배포 시 `DATABASE_URL`, `JWT_SECRET_KEY` 환경변수가 Task Definition에 없었음
+- **해결**: ECS 모듈에 `database_url`, `jwt_secret_key` 변수 추가, `TF_VAR_*` 환경변수로 주입
+
+### T7. Grafana 대시보드 No Data
+- **원인**: Recording Rules와 대시보드의 `job` 라벨이 `supplement-rec`으로 설정되어 있었으나, 실제 메트릭은 `supplement-rec-dev`로 전송됨
+- **해결**: Recording Rules 및 대시보드 쿼리의 job 라벨을 `supplement-rec-dev`로 수정
 
 ---
 
@@ -228,6 +261,17 @@ aws ecs update-service \
 | 가용성 | 성공 응답(2xx/3xx) / 전체 요청 | 99.9% (월간) |
 | 레이턴시 | P99 < 200ms 비율 | 99% |
 
+### AMP Recording Rules
+
+| Rule | 설명 | 간격 |
+|------|------|------|
+| `job:http_requests_total:rate5m` | 엔드포인트별 RPS | 60s |
+| `job:http_error_rate:rate5m` | 5xx 에러 비율 | 60s |
+| `job:http_success_rate:rate5m` | 성공 요청 비율 (SLI) | 60s |
+| `job:http_request_duration_ms:p99/p95/p50` | 레이턴시 백분위수 | 60s |
+| `job:recommendation_api_duration_ms:p99` | 추천 API P99 | 60s |
+| `job:error_budget_remaining:30d` | Error Budget 잔량 | 300s |
+
 ---
 
 ## 9. 예상 월 비용 (dev)
@@ -239,4 +283,5 @@ aws ecs update-service \
 | X-Ray | ~$1.00 |
 | VPC Endpoints | ~$60.48 |
 | ADOT Sidecar Fargate | ~$12.00 |
-| **합계** | **~$82** |
+| AMG | ~$9.00 |
+| **합계** | **~$91** |

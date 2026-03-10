@@ -43,7 +43,7 @@ resource "aws_iam_role" "github_actions" {
           }
           StringLike = {
             # main 브랜치 push + PR 모두 허용
-            "token.actions.githubusercontent.com:sub" = "repo:ACS-Nutrients/svc-mypage:*"
+            "token.actions.githubusercontent.com:sub" = "repo:ACS-Nutrients/codecaine-python-mypage:*"
           }
         }
       }
