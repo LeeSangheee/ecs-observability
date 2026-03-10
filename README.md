@@ -14,7 +14,6 @@
 | 트레이스 | AWS X-Ray |
 | 시각화 | AMG (Amazon Managed Grafana) |
 | 수집기 | ADOT Sidecar (ECS Task 내) |
-| 알림 | SNS + Lambda → Slack |
 | IaC | Terraform |
 | CI/CD | GitHub Actions (OIDC) |
 
@@ -49,10 +48,6 @@ ALB
                              ▼
                       AMG (Grafana)
                        통합 시각화
-                             │
-                             ▼
-                    SNS → Lambda → Slack
-                       알림 전송
 ```
 
 ### 네트워크 구성
@@ -110,14 +105,11 @@ ecs-observability/
 │           ├── cloudwatch.tf        # Log Groups + Metric Filters
 │           ├── grafana.tf           # AMG Workspace + IAM Role
 │           ├── iam.tf               # ADOT Task Role
-│           ├── slack.tf             # SNS → Lambda → Slack 알림
 │           ├── sns.tf               # SNS Topic
 │           ├── ssm.tf               # ADOT Config (SSM Parameter Store)
 │           ├── xray.tf              # X-Ray Sampling Rules
 │           ├── dashboards/
 │           │   └── golden-signals.json  # Golden Signals 대시보드
-│           └── lambda/
-│               └── slack_notifier.py    # Slack 알림 Lambda
 └── .gitignore
 ```
 
@@ -150,7 +142,6 @@ ecs-observability/
 - [x] AMP / CloudWatch / X-Ray 데이터소스 연결
 - [x] Golden Signals 대시보드 (Latency, Traffic, Errors, Saturation)
 - [x] AMP Recording Rules (RPS, 에러율, P99/P95/P50, Error Budget)
-- [x] SNS → Lambda → Slack 알림 구조 (Webhook URL 설정 시 활성화)
 
 ---
 
@@ -164,8 +155,6 @@ cd terraform/environments/dev
 # 환경변수 설정 (민감 정보)
 export TF_VAR_database_url="postgresql+asyncpg://user:pass@host:5432/dbname"
 export TF_VAR_jwt_secret_key="your-secret-key"
-# (선택) export TF_VAR_alarm_slack_webhook_url="https://hooks.slack.com/..."
-
 terraform init
 terraform apply
 ```
