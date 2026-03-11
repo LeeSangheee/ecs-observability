@@ -13,7 +13,24 @@
       "Bash(aws ecs:*)",
       "Bash(aws logs:*)",
       "Bash(MSYS_NO_PATHCONV=1 aws logs:*)",
-      "Bash(MSYS_NO_PATHCONV=1 aws ecs:*)"
+      "Bash(MSYS_NO_PATHCONV=1 aws ecs:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(python:*)",
+      "Bash(terraform validate:*)",
+      "Bash(terraform init:*)",
+      "Bash(aws sts:*)",
+      "Bash(ls:*)",
+      "Bash(terraform import:*)",
+      "Bash(terraform state:*)",
+      "Bash(terraform output:*)",
+      "Bash(aws sso-admin:*)",
+      "Bash(aws identitystore:*)",
+      "Bash(aws grafana:*)",
+      "Bash(curl:*)",
+      "Bash(MSYS_NO_PATHCONV=1 aws amp:*)",
+      "Bash(git status:*)",
+      "Bash(git commit:*)",
+      "Bash(git:*)"
     ]
   }
 }

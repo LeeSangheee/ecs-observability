@@ -1,0 +1,3764 @@
+{
+  "version": 4,
+  "terraform_version": "1.14.4",
+  "serial": 93,
+  "lineage": "368fadbc-7b9b-8a9a-bb51-0a5163159392",
+  "outputs": {
+    "adot_task_role_arn": {
+      "value": "arn:aws:iam::284484063229:role/supplement-rec-dev-adot-task-role",
+      "type": "string"
+    },
+    "alarm_sns_topic_arn": {
+      "value": "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms",
+      "type": "string"
+    },
+    "alb_url": {
+      "value": "http://supplement-rec-dev-alb-2139117748.ap-northeast-2.elb.amazonaws.com",
+      "type": "string"
+    },
+    "amp_endpoint": {
+      "value": "https://aps-workspaces.ap-northeast-2.amazonaws.com/workspaces/ws-575a1e7d-fc5e-4783-b009-7b680150cedd/",
+      "type": "string"
+    },
+    "amp_workspace_id": {
+      "value": "ws-575a1e7d-fc5e-4783-b009-7b680150cedd",
+      "type": "string"
+    },
+    "ecs_cluster_name": {
+      "value": "supplement-rec-dev",
+      "type": "string"
+    },
+    "github_actions_role_arn": {
+      "value": "arn:aws:iam::284484063229:role/supplement-rec-dev-github-actions",
+      "type": "string"
+    },
+    "nat_public_ips": {
+      "value": [
+        "15.164.194.177",
+        "43.200.228.213"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string",
+          "string"
+        ]
+      ]
+    },
+    "task_definition_arn": {
+      "value": "arn:aws:ecs:ap-northeast-2:284484063229:task-definition/supplement-rec-dev:4",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "aws_caller_identity",
+      "name": "current",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_id": "284484063229",
+            "arn": "arn:aws:iam::284484063229:user/Administrator",
+            "id": "284484063229",
+            "user_id": "AIDAUEPESJ767QU4YQVIC"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_metric_alarm",
+      "name": "adot_exporter_error",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "actions_enabled": true,
+            "alarm_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "alarm_description": "ADOT Sidecar가 데이터 전송에 실패했습니다. 관측 데이터가 유실될 수 있습니다.",
+            "alarm_name": "supplement-rec-dev-adot-exporter-error",
+            "arn": "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:supplement-rec-dev-adot-exporter-error",
+            "comparison_operator": "GreaterThanThreshold",
+            "datapoints_to_alarm": 1,
+            "dimensions": {},
+            "evaluate_low_sample_count_percentiles": "",
+            "evaluation_periods": 2,
+            "extended_statistic": "",
+            "id": "supplement-rec-dev-adot-exporter-error",
+            "insufficient_data_actions": [],
+            "metric_name": "AdotExporterError",
+            "metric_query": [],
+            "namespace": "supplement-rec/dev",
+            "ok_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "period": 300,
+            "statistic": "Sum",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "threshold": 0,
+            "threshold_metric_id": "",
+            "treat_missing_data": "notBreaching",
+            "unit": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "module.observability.aws_sns_topic.alarms"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_metric_alarm",
+      "name": "alb_latency",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "actions_enabled": true,
+            "alarm_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "alarm_description": "API P99 레이턴시가 2초를 초과했습니다. 추천 알고리즘 성능과 DB 응답 시간을 확인하세요.",
+            "alarm_name": "supplement-rec-dev-high-latency",
+            "arn": "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:supplement-rec-dev-high-latency",
+            "comparison_operator": "GreaterThanThreshold",
+            "datapoints_to_alarm": 3,
+            "dimensions": {
+              "LoadBalancer": "app/supplement-rec-dev-alb/c21dbda4dacc1403",
+              "TargetGroup": "targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7"
+            },
+            "evaluate_low_sample_count_percentiles": "",
+            "evaluation_periods": 5,
+            "extended_statistic": "p99",
+            "id": "supplement-rec-dev-high-latency",
+            "insufficient_data_actions": [],
+            "metric_name": "TargetResponseTime",
+            "metric_query": [],
+            "namespace": "AWS/ApplicationELB",
+            "ok_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "period": 60,
+            "statistic": "",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "threshold": 2,
+            "threshold_metric_id": "",
+            "treat_missing_data": "notBreaching",
+            "unit": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "module.ecs.aws_lb.main",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_sns_topic.alarms"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_metric_alarm",
+      "name": "cpu_utilization",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "actions_enabled": true,
+            "alarm_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "alarm_description": "CPU 사용률이 80%를 10분간 초과했습니다. Auto Scaling 동작을 확인하세요.",
+            "alarm_name": "supplement-rec-dev-high-cpu",
+            "arn": "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:supplement-rec-dev-high-cpu",
+            "comparison_operator": "GreaterThanThreshold",
+            "datapoints_to_alarm": 8,
+            "dimensions": {
+              "ClusterName": "supplement-rec-dev",
+              "ServiceName": "supplement-rec-dev"
+            },
+            "evaluate_low_sample_count_percentiles": "",
+            "evaluation_periods": 10,
+            "extended_statistic": "",
+            "id": "supplement-rec-dev-high-cpu",
+            "insufficient_data_actions": [],
+            "metric_name": "CPUUtilization",
+            "metric_query": [],
+            "namespace": "AWS/ECS",
+            "ok_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "period": 60,
+            "statistic": "Average",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "threshold": 80,
+            "threshold_metric_id": "",
+            "treat_missing_data": "notBreaching",
+            "unit": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_service.app",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_sns_topic.alarms",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_metric_alarm",
+      "name": "ecs_running_task_count",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "actions_enabled": true,
+            "alarm_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "alarm_description": "ECS Service Running Task 수가 비정상입니다. ECS 콘솔의 Events 탭에서 오류를 확인하세요.",
+            "alarm_name": "supplement-rec-dev-ecs-task-unhealthy",
+            "arn": "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:supplement-rec-dev-ecs-task-unhealthy",
+            "comparison_operator": "LessThanThreshold",
+            "datapoints_to_alarm": 3,
+            "dimensions": {
+              "ClusterName": "supplement-rec-dev",
+              "ServiceName": "supplement-rec-dev"
+            },
+            "evaluate_low_sample_count_percentiles": "",
+            "evaluation_periods": 3,
+            "extended_statistic": "",
+            "id": "supplement-rec-dev-ecs-task-unhealthy",
+            "insufficient_data_actions": [],
+            "metric_name": "RunningTaskCount",
+            "metric_query": [],
+            "namespace": "ECS/ContainerInsights",
+            "ok_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "period": 60,
+            "statistic": "Average",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "threshold": 1,
+            "threshold_metric_id": "",
+            "treat_missing_data": "notBreaching",
+            "unit": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_service.app",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_sns_topic.alarms",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_metric_alarm",
+      "name": "error_rate",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "actions_enabled": true,
+            "alarm_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "alarm_description": "에러율이 1%를 초과했습니다. ECS 로그와 X-Ray 트레이스를 확인하세요.",
+            "alarm_name": "supplement-rec-dev-high-error-rate",
+            "arn": "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:supplement-rec-dev-high-error-rate",
+            "comparison_operator": "GreaterThanThreshold",
+            "datapoints_to_alarm": 0,
+            "dimensions": {},
+            "evaluate_low_sample_count_percentiles": "",
+            "evaluation_periods": 5,
+            "extended_statistic": "",
+            "id": "supplement-rec-dev-high-error-rate",
+            "insufficient_data_actions": [],
+            "metric_name": "",
+            "metric_query": [
+              {
+                "account_id": "",
+                "expression": "",
+                "id": "errors",
+                "label": "",
+                "metric": [
+                  {
+                    "dimensions": {
+                      "LoadBalancer": "app/supplement-rec-dev-alb/c21dbda4dacc1403",
+                      "TargetGroup": "targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7"
+                    },
+                    "metric_name": "HTTPCode_Target_5XX_Count",
+                    "namespace": "AWS/ApplicationELB",
+                    "period": 60,
+                    "stat": "Sum",
+                    "unit": ""
+                  }
+                ],
+                "period": 0,
+                "return_data": false
+              },
+              {
+                "account_id": "",
+                "expression": "",
+                "id": "total",
+                "label": "",
+                "metric": [
+                  {
+                    "dimensions": {
+                      "LoadBalancer": "app/supplement-rec-dev-alb/c21dbda4dacc1403",
+                      "TargetGroup": "targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7"
+                    },
+                    "metric_name": "RequestCount",
+                    "namespace": "AWS/ApplicationELB",
+                    "period": 60,
+                    "stat": "Sum",
+                    "unit": ""
+                  }
+                ],
+                "period": 0,
+                "return_data": false
+              },
+              {
+                "account_id": "",
+                "expression": "(errors / total) * 100",
+                "id": "error_rate",
+                "label": "에러율 (%)",
+                "metric": [],
+                "period": 0,
+                "return_data": true
+              }
+            ],
+            "namespace": "",
+            "ok_actions": [
+              "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms"
+            ],
+            "period": 0,
+            "statistic": "",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "threshold": 1,
+            "threshold_metric_id": "",
+            "treat_missing_data": "notBreaching",
+            "unit": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "module.ecs.aws_lb.main",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_sns_topic.alarms"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_ecr_lifecycle_policy",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "svc-mypage",
+            "policy": "{\"rules\":[{\"action\":{\"type\":\"expire\"},\"description\":\"sha- 태그 이미지 최근 10개만 유지\",\"rulePriority\":1,\"selection\":{\"countNumber\":10,\"countType\":\"imageCountMoreThan\",\"tagPrefixList\":[\"sha-\"],\"tagStatus\":\"tagged\"}},{\"action\":{\"type\":\"expire\"},\"description\":\"untagged 이미지 1일 후 삭제\",\"rulePriority\":2,\"selection\":{\"countNumber\":1,\"countType\":\"sinceImagePushed\",\"countUnit\":\"days\",\"tagStatus\":\"untagged\"}}]}",
+            "registry_id": "284484063229",
+            "repository": "svc-mypage"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_ecr_repository.app"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_ecr_repository",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecr:ap-northeast-2:284484063229:repository/svc-mypage",
+            "encryption_configuration": [
+              {
+                "encryption_type": "AES256",
+                "kms_key": ""
+              }
+            ],
+            "force_delete": null,
+            "id": "svc-mypage",
+            "image_scanning_configuration": [
+              {
+                "scan_on_push": true
+              }
+            ],
+            "image_tag_mutability": "MUTABLE",
+            "name": "svc-mypage",
+            "registry_id": "284484063229",
+            "repository_url": "284484063229.dkr.ecr.ap-northeast-2.amazonaws.com/svc-mypage",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "svc-mypage",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "svc-mypage",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_openid_connect_provider",
+      "name": "github_actions",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::284484063229:oidc-provider/token.actions.githubusercontent.com",
+            "client_id_list": [
+              "sts.amazonaws.com"
+            ],
+            "id": "arn:aws:iam::284484063229:oidc-provider/token.actions.githubusercontent.com",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "thumbprint_list": [
+              "6938fd4d98bab03faadb97b34396831e3780aea1",
+              "1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+            ],
+            "url": "token.actions.githubusercontent.com"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "github_actions",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::284484063229:role/supplement-rec-dev-github-actions",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRoleWithWebIdentity\",\"Condition\":{\"StringEquals\":{\"token.actions.githubusercontent.com:aud\":\"sts.amazonaws.com\"},\"StringLike\":{\"token.actions.githubusercontent.com:sub\":\"repo:ACS-Nutrients/svc-mypage:*\"}},\"Effect\":\"Allow\",\"Principal\":{\"Federated\":\"arn:aws:iam::284484063229:oidc-provider/token.actions.githubusercontent.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2026-03-09T02:49:28Z",
+            "description": "GitHub Actions OIDC role for svc-mypage CI/CD",
+            "force_detach_policies": false,
+            "id": "supplement-rec-dev-github-actions",
+            "inline_policy": [
+              {
+                "name": "ecr-push-ecs-deploy",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ecr:GetAuthorizationToken\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"ECRAuth\"},{\"Action\":[\"ecr:BatchGetImage\",\"ecr:BatchCheckLayerAvailability\",\"ecr:PutImage\",\"ecr:InitiateLayerUpload\",\"ecr:UploadLayerPart\",\"ecr:CompleteLayerUpload\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ecr:ap-northeast-2:284484063229:repository/svc-mypage\",\"Sid\":\"ECRPush\"},{\"Action\":[\"ecs:UpdateService\",\"ecs:DescribeServices\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ecs:ap-northeast-2:284484063229:service/supplement-rec-dev/supplement-rec-dev\",\"Sid\":\"ECSUpdate\"}]}"
+              }
+            ],
+            "managed_policy_arns": [],
+            "max_session_duration": 3600,
+            "name": "supplement-rec-dev-github-actions",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "unique_id": "AROAUEPESJ767VJWMDTYD"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_openid_connect_provider.github_actions"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "github_actions",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-github-actions:ecr-push-ecs-deploy",
+            "name": "ecr-push-ecs-deploy",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ecr:GetAuthorizationToken\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"ECRAuth\"},{\"Action\":[\"ecr:BatchGetImage\",\"ecr:BatchCheckLayerAvailability\",\"ecr:PutImage\",\"ecr:InitiateLayerUpload\",\"ecr:UploadLayerPart\",\"ecr:CompleteLayerUpload\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ecr:ap-northeast-2:284484063229:repository/svc-mypage\",\"Sid\":\"ECRPush\"},{\"Action\":[\"ecs:UpdateService\",\"ecs:DescribeServices\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ecs:ap-northeast-2:284484063229:service/supplement-rec-dev/supplement-rec-dev\",\"Sid\":\"ECSUpdate\"}]}",
+            "role": "supplement-rec-dev-github-actions"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "aws_iam_openid_connect_provider.github_actions",
+            "aws_iam_role.github_actions",
+            "data.aws_caller_identity.current",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_service.app",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_appautoscaling_policy",
+      "name": "cpu",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "alarm_arns": [
+              "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:TargetTracking-service/supplement-rec-dev/supplement-rec-dev-AlarmHigh-48f4b4c0-cc56-4817-8117-bdd287d51f5a",
+              "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:TargetTracking-service/supplement-rec-dev/supplement-rec-dev-AlarmLow-db2e4ef2-ac13-40c5-b8e6-0f987fe99f7c"
+            ],
+            "arn": "arn:aws:autoscaling:ap-northeast-2:284484063229:scalingPolicy:68e60f68-ca2a-48f6-a34e-3223f2fc9a38:resource/ecs/service/supplement-rec-dev/supplement-rec-dev:policyName/supplement-rec-dev-cpu-scaling",
+            "id": "supplement-rec-dev-cpu-scaling",
+            "name": "supplement-rec-dev-cpu-scaling",
+            "policy_type": "TargetTrackingScaling",
+            "resource_id": "service/supplement-rec-dev/supplement-rec-dev",
+            "scalable_dimension": "ecs:service:DesiredCount",
+            "service_namespace": "ecs",
+            "step_scaling_policy_configuration": [],
+            "target_tracking_scaling_policy_configuration": [
+              {
+                "customized_metric_specification": [],
+                "disable_scale_in": false,
+                "predefined_metric_specification": [
+                  {
+                    "predefined_metric_type": "ECSServiceAverageCPUUtilization",
+                    "resource_label": ""
+                  }
+                ],
+                "scale_in_cooldown": 300,
+                "scale_out_cooldown": 60,
+                "target_value": 70
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_appautoscaling_target.ecs",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_service.app",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_appautoscaling_policy",
+      "name": "memory",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "alarm_arns": [
+              "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:TargetTracking-service/supplement-rec-dev/supplement-rec-dev-AlarmHigh-21e1e637-d78d-4fd2-b43e-5ad33313f8da",
+              "arn:aws:cloudwatch:ap-northeast-2:284484063229:alarm:TargetTracking-service/supplement-rec-dev/supplement-rec-dev-AlarmLow-275a3fa6-12e4-437d-8e99-26c7150d9ca5"
+            ],
+            "arn": "arn:aws:autoscaling:ap-northeast-2:284484063229:scalingPolicy:68e60f68-ca2a-48f6-a34e-3223f2fc9a38:resource/ecs/service/supplement-rec-dev/supplement-rec-dev:policyName/supplement-rec-dev-memory-scaling",
+            "id": "supplement-rec-dev-memory-scaling",
+            "name": "supplement-rec-dev-memory-scaling",
+            "policy_type": "TargetTrackingScaling",
+            "resource_id": "service/supplement-rec-dev/supplement-rec-dev",
+            "scalable_dimension": "ecs:service:DesiredCount",
+            "service_namespace": "ecs",
+            "step_scaling_policy_configuration": [],
+            "target_tracking_scaling_policy_configuration": [
+              {
+                "customized_metric_specification": [],
+                "disable_scale_in": false,
+                "predefined_metric_specification": [
+                  {
+                    "predefined_metric_type": "ECSServiceAverageMemoryUtilization",
+                    "resource_label": ""
+                  }
+                ],
+                "scale_in_cooldown": 300,
+                "scale_out_cooldown": 60,
+                "target_value": 75
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_appautoscaling_target.ecs",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_service.app",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_appautoscaling_target",
+      "name": "ecs",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:application-autoscaling:ap-northeast-2:284484063229:scalable-target/0ec568e60f68ca2a48f6a34e3223f2fc9a38",
+            "id": "service/supplement-rec-dev/supplement-rec-dev",
+            "max_capacity": 4,
+            "min_capacity": 1,
+            "resource_id": "service/supplement-rec-dev/supplement-rec-dev",
+            "role_arn": "arn:aws:iam::284484063229:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+            "scalable_dimension": "ecs:service:DesiredCount",
+            "service_namespace": "ecs",
+            "suspended_state": [
+              {
+                "dynamic_scaling_in_suspended": false,
+                "dynamic_scaling_out_suspended": false,
+                "scheduled_scaling_suspended": false
+              }
+            ],
+            "tags": {},
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_service.app",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_ecs_cluster",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecs:ap-northeast-2:284484063229:cluster/supplement-rec-dev",
+            "configuration": [],
+            "id": "arn:aws:ecs:ap-northeast-2:284484063229:cluster/supplement-rec-dev",
+            "name": "supplement-rec-dev",
+            "service_connect_defaults": [],
+            "setting": [
+              {
+                "name": "containerInsights",
+                "value": "enabled"
+              }
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-cluster",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-cluster",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_ecs_cluster_capacity_providers",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "capacity_providers": [
+              "FARGATE",
+              "FARGATE_SPOT"
+            ],
+            "cluster_name": "supplement-rec-dev",
+            "default_capacity_provider_strategy": [
+              {
+                "base": 1,
+                "capacity_provider": "FARGATE",
+                "weight": 1
+              }
+            ],
+            "id": "supplement-rec-dev"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.ecs.aws_ecs_cluster.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_ecs_service",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "alarms": [],
+            "availability_zone_rebalancing": "DISABLED",
+            "capacity_provider_strategy": [],
+            "cluster": "arn:aws:ecs:ap-northeast-2:284484063229:cluster/supplement-rec-dev",
+            "deployment_circuit_breaker": [
+              {
+                "enable": true,
+                "rollback": true
+              }
+            ],
+            "deployment_controller": [
+              {
+                "type": "ECS"
+              }
+            ],
+            "deployment_maximum_percent": 200,
+            "deployment_minimum_healthy_percent": 100,
+            "desired_count": 2,
+            "enable_ecs_managed_tags": false,
+            "enable_execute_command": false,
+            "force_delete": null,
+            "force_new_deployment": null,
+            "health_check_grace_period_seconds": 0,
+            "iam_role": "/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+            "id": "arn:aws:ecs:ap-northeast-2:284484063229:service/supplement-rec-dev/supplement-rec-dev",
+            "launch_type": "FARGATE",
+            "load_balancer": [
+              {
+                "container_name": "app",
+                "container_port": 8000,
+                "elb_name": "",
+                "target_group_arn": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7"
+              }
+            ],
+            "name": "supplement-rec-dev",
+            "network_configuration": [
+              {
+                "assign_public_ip": false,
+                "security_groups": [
+                  "sg-062fc68040e0b123c"
+                ],
+                "subnets": [
+                  "subnet-01381794ca3023ae1",
+                  "subnet-095c4cabba862180b"
+                ]
+              }
+            ],
+            "ordered_placement_strategy": [],
+            "placement_constraints": [],
+            "platform_version": "LATEST",
+            "propagate_tags": "NONE",
+            "scheduling_strategy": "REPLICA",
+            "service_connect_configuration": [],
+            "service_registries": [],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "task_definition": "arn:aws:ecs:ap-northeast-2:284484063229:task-definition/supplement-rec-dev:4",
+            "timeouts": null,
+            "triggers": {},
+            "volume_configuration": [],
+            "vpc_lattice_configurations": [],
+            "wait_for_steady_state": false
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_ecs_cluster.main",
+            "module.ecs.aws_ecs_task_definition.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.ecs.aws_security_group.ecs_tasks",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_ecs_task_definition",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ecs:ap-northeast-2:284484063229:task-definition/supplement-rec-dev:4",
+            "arn_without_revision": "arn:aws:ecs:ap-northeast-2:284484063229:task-definition/supplement-rec-dev",
+            "container_definitions": "[{\"command\":[\"--config=env:AOT_CONFIG_CONTENT\"],\"cpu\":256,\"dependsOn\":[{\"condition\":\"HEALTHY\",\"containerName\":\"app\"}],\"environment\":[{\"name\":\"AWS_REGION\",\"value\":\"ap-northeast-2\"}],\"essential\":false,\"healthCheck\":{\"command\":[\"CMD-SHELL\",\"curl -sf http://localhost:13133/ || exit 1\"],\"interval\":30,\"retries\":3,\"startPeriod\":30,\"timeout\":5},\"image\":\"public.ecr.aws/aws-observability/aws-otel-collector:latest\",\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-region\":\"ap-northeast-2\",\"awslogs-stream-prefix\":\"adot\",\"awslogs-group\":\"/ecs/supplement-rec-dev/adot-collector\"}},\"memory\":512,\"mountPoints\":[],\"name\":\"adot-collector\",\"portMappings\":[{\"containerPort\":4317,\"hostPort\":4317,\"name\":\"otlp-grpc\",\"protocol\":\"tcp\"},{\"containerPort\":4318,\"hostPort\":4318,\"name\":\"otlp-http\",\"protocol\":\"tcp\"},{\"containerPort\":13133,\"hostPort\":13133,\"name\":\"health\",\"protocol\":\"tcp\"}],\"secrets\":[{\"name\":\"AOT_CONFIG_CONTENT\",\"valueFrom\":\"arn:aws:ssm:ap-northeast-2:284484063229:parameter/supplement-rec/dev/adot-config\"}],\"stopTimeout\":30,\"systemControls\":[],\"volumesFrom\":[]},{\"cpu\":512,\"environment\":[{\"name\":\"OTEL_EXPORTER_OTLP_ENDPOINT\",\"value\":\"http://localhost:4317\"},{\"name\":\"OTEL_PROPAGATORS\",\"value\":\"tracecontext,baggage\"},{\"name\":\"OTEL_RESOURCE_ATTRIBUTES\",\"value\":\"deployment.environment=dev\"},{\"name\":\"OTEL_SERVICE_NAME\",\"value\":\"supplement-rec-dev\"}],\"essential\":true,\"healthCheck\":{\"command\":[\"CMD-SHELL\",\"curl -sf http://localhost:8000/health || exit 1\"],\"interval\":30,\"retries\":3,\"startPeriod\":60,\"timeout\":5},\"image\":\"284484063229.dkr.ecr.ap-northeast-2.amazonaws.com/svc-mypage:latest\",\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"/ecs/supplement-rec-dev\",\"awslogs-region\":\"ap-northeast-2\",\"awslogs-stream-prefix\":\"app\"}},\"memory\":1024,\"mountPoints\":[],\"name\":\"app\",\"portMappings\":[{\"containerPort\":8000,\"hostPort\":8000,\"name\":\"http\",\"protocol\":\"tcp\"}],\"stopTimeout\":30,\"systemControls\":[],\"volumesFrom\":[]}]",
+            "cpu": "1024",
+            "enable_fault_injection": false,
+            "ephemeral_storage": [],
+            "execution_role_arn": "arn:aws:iam::284484063229:role/supplement-rec-dev-ecs-task-execution-role",
+            "family": "supplement-rec-dev",
+            "id": "supplement-rec-dev",
+            "inference_accelerator": [],
+            "ipc_mode": "",
+            "memory": "2048",
+            "network_mode": "awsvpc",
+            "pid_mode": "",
+            "placement_constraints": [],
+            "proxy_configuration": [],
+            "requires_compatibilities": [
+              "FARGATE"
+            ],
+            "revision": 4,
+            "runtime_platform": [],
+            "skip_destroy": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "task_role_arn": "arn:aws:iam::284484063229:role/supplement-rec-dev-adot-task-role",
+            "track_latest": false,
+            "volume": []
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "dependencies": [
+            "aws_ecr_repository.app",
+            "module.ecs.aws_iam_role.task_execution",
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main",
+            "module.observability.aws_ssm_parameter.adot_config"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "task_execution",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::284484063229:role/supplement-rec-dev-ecs-task-execution-role",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2026-03-09T01:05:30Z",
+            "description": "ECS Task Execution Role - ECR pull, CloudWatch Logs write, SSM read",
+            "force_detach_policies": false,
+            "id": "supplement-rec-dev-ecs-task-execution-role",
+            "inline_policy": [
+              {
+                "name": "supplement-rec-dev-task-execution-ssm",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ssm:GetParameters\",\"ssm:GetParameter\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:ap-northeast-2:*:parameter/supplement-rec/dev/*\",\"Sid\":\"SSMParameterReadForAdotConfig\"}]}"
+              }
+            ],
+            "managed_policy_arns": [
+              "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+            ],
+            "max_session_duration": 3600,
+            "name": "supplement-rec-dev-ecs-task-execution-role",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "unique_id": "AROAUEPESJ766GF2WEOW3"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "task_execution_ssm",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-ecs-task-execution-role:supplement-rec-dev-task-execution-ssm",
+            "name": "supplement-rec-dev-task-execution-ssm",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ssm:GetParameters\",\"ssm:GetParameter\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:ssm:ap-northeast-2:*:parameter/supplement-rec/dev/*\",\"Sid\":\"SSMParameterReadForAdotConfig\"}]}",
+            "role": "supplement-rec-dev-ecs-task-execution-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.ecs.aws_iam_role.task_execution"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_iam_role_policy_attachment",
+      "name": "task_execution_basic",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-ecs-task-execution-role-20260309010531802700000005",
+            "policy_arn": "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+            "role": "supplement-rec-dev-ecs-task-execution-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.ecs.aws_iam_role.task_execution"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_lb",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "access_logs": [
+              {
+                "bucket": "",
+                "enabled": false,
+                "prefix": ""
+              }
+            ],
+            "arn": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:loadbalancer/app/supplement-rec-dev-alb/c21dbda4dacc1403",
+            "arn_suffix": "app/supplement-rec-dev-alb/c21dbda4dacc1403",
+            "client_keep_alive": 3600,
+            "connection_logs": [
+              {
+                "bucket": "",
+                "enabled": false,
+                "prefix": ""
+              }
+            ],
+            "customer_owned_ipv4_pool": "",
+            "desync_mitigation_mode": "defensive",
+            "dns_name": "supplement-rec-dev-alb-2139117748.ap-northeast-2.elb.amazonaws.com",
+            "dns_record_client_routing_policy": null,
+            "drop_invalid_header_fields": false,
+            "enable_cross_zone_load_balancing": true,
+            "enable_deletion_protection": false,
+            "enable_http2": true,
+            "enable_tls_version_and_cipher_suite_headers": false,
+            "enable_waf_fail_open": false,
+            "enable_xff_client_port": false,
+            "enable_zonal_shift": false,
+            "enforce_security_group_inbound_rules_on_private_link_traffic": "",
+            "id": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:loadbalancer/app/supplement-rec-dev-alb/c21dbda4dacc1403",
+            "idle_timeout": 60,
+            "internal": false,
+            "ip_address_type": "ipv4",
+            "ipam_pools": [],
+            "load_balancer_type": "application",
+            "minimum_load_balancer_capacity": [],
+            "name": "supplement-rec-dev-alb",
+            "name_prefix": "",
+            "preserve_host_header": false,
+            "security_groups": [
+              "sg-0d5fc41263db7fdfa"
+            ],
+            "subnet_mapping": [
+              {
+                "allocation_id": "",
+                "ipv6_address": "",
+                "outpost_id": "",
+                "private_ipv4_address": "",
+                "subnet_id": "subnet-06c5f08030616389c"
+              },
+              {
+                "allocation_id": "",
+                "ipv6_address": "",
+                "outpost_id": "",
+                "private_ipv4_address": "",
+                "subnet_id": "subnet-0eafc13f9bc0dc79d"
+              }
+            ],
+            "subnets": [
+              "subnet-06c5f08030616389c",
+              "subnet-0eafc13f9bc0dc79d"
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-alb",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-alb",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861",
+            "xff_header_processing_mode": "append",
+            "zone_id": "ZWKZPGTI48KDX"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.ecs.aws_security_group.alb",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_lb_listener",
+      "name": "http",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "alpn_policy": null,
+            "arn": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:listener/app/supplement-rec-dev-alb/c21dbda4dacc1403/3e5df61af978aa8c",
+            "certificate_arn": null,
+            "default_action": [
+              {
+                "authenticate_cognito": [],
+                "authenticate_oidc": [],
+                "fixed_response": [],
+                "forward": [],
+                "order": 1,
+                "redirect": [],
+                "target_group_arn": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7",
+                "type": "forward"
+              }
+            ],
+            "id": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:listener/app/supplement-rec-dev-alb/c21dbda4dacc1403/3e5df61af978aa8c",
+            "load_balancer_arn": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:loadbalancer/app/supplement-rec-dev-alb/c21dbda4dacc1403",
+            "mutual_authentication": [],
+            "port": 80,
+            "protocol": "HTTP",
+            "routing_http_request_x_amzn_mtls_clientcert_header_name": null,
+            "routing_http_request_x_amzn_mtls_clientcert_issuer_header_name": null,
+            "routing_http_request_x_amzn_mtls_clientcert_leaf_header_name": null,
+            "routing_http_request_x_amzn_mtls_clientcert_serial_number_header_name": null,
+            "routing_http_request_x_amzn_mtls_clientcert_subject_header_name": null,
+            "routing_http_request_x_amzn_mtls_clientcert_validity_header_name": null,
+            "routing_http_request_x_amzn_tls_cipher_suite_header_name": null,
+            "routing_http_request_x_amzn_tls_version_header_name": null,
+            "routing_http_response_access_control_allow_credentials_header_value": "",
+            "routing_http_response_access_control_allow_headers_header_value": "",
+            "routing_http_response_access_control_allow_methods_header_value": "",
+            "routing_http_response_access_control_allow_origin_header_value": "",
+            "routing_http_response_access_control_expose_headers_header_value": "",
+            "routing_http_response_access_control_max_age_header_value": "",
+            "routing_http_response_content_security_policy_header_value": "",
+            "routing_http_response_server_enabled": true,
+            "routing_http_response_strict_transport_security_header_value": "",
+            "routing_http_response_x_content_type_options_header_value": "",
+            "routing_http_response_x_frame_options_header_value": "",
+            "ssl_policy": "",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tcp_idle_timeout_seconds": null,
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsInVwZGF0ZSI6MzAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "module.ecs.aws_lb.main",
+            "module.ecs.aws_lb_target_group.app",
+            "module.ecs.aws_security_group.alb",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_lb_target_group",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7",
+            "arn_suffix": "targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7",
+            "connection_termination": null,
+            "deregistration_delay": "30",
+            "health_check": [
+              {
+                "enabled": true,
+                "healthy_threshold": 2,
+                "interval": 30,
+                "matcher": "200",
+                "path": "/health",
+                "port": "traffic-port",
+                "protocol": "HTTP",
+                "timeout": 5,
+                "unhealthy_threshold": 3
+              }
+            ],
+            "id": "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:targetgroup/svc-20260309025455482600000001/db1ed052818a8fa7",
+            "ip_address_type": "ipv4",
+            "lambda_multi_value_headers_enabled": false,
+            "load_balancer_arns": [
+              "arn:aws:elasticloadbalancing:ap-northeast-2:284484063229:loadbalancer/app/supplement-rec-dev-alb/c21dbda4dacc1403"
+            ],
+            "load_balancing_algorithm_type": "round_robin",
+            "load_balancing_anomaly_mitigation": "off",
+            "load_balancing_cross_zone_enabled": "use_load_balancer_configuration",
+            "name": "svc-20260309025455482600000001",
+            "name_prefix": "svc-",
+            "port": 8000,
+            "preserve_client_ip": null,
+            "protocol": "HTTP",
+            "protocol_version": "HTTP1",
+            "proxy_protocol_v2": false,
+            "slow_start": 0,
+            "stickiness": [
+              {
+                "cookie_duration": 86400,
+                "cookie_name": "",
+                "enabled": false,
+                "type": "lb_cookie"
+              }
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-tg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-tg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "target_failover": [
+              {
+                "on_deregistration": null,
+                "on_unhealthy": null
+              }
+            ],
+            "target_group_health": [
+              {
+                "dns_failover": [
+                  {
+                    "minimum_healthy_targets_count": "1",
+                    "minimum_healthy_targets_percentage": "off"
+                  }
+                ],
+                "unhealthy_state_routing": [
+                  {
+                    "minimum_healthy_targets_count": 1,
+                    "minimum_healthy_targets_percentage": "off"
+                  }
+                ]
+              }
+            ],
+            "target_health_state": [
+              {
+                "enable_unhealthy_connection_termination": null,
+                "unhealthy_draining_interval": null
+              }
+            ],
+            "target_type": "ip",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ],
+          "create_before_destroy": true
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "alb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:security-group/sg-0d5fc41263db7fdfa",
+            "description": "ALB security group - HTTP(80) and HTTPS(443) ingress from internet",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "Allow all outbound to ECS tasks",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-0d5fc41263db7fdfa",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "HTTP ingress (for HTTPS redirect)",
+                "from_port": 80,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 80
+              },
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "HTTPS ingress",
+                "from_port": 443,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 443
+              }
+            ],
+            "name": "supplement-rec-dev-alb-sg",
+            "name_prefix": "",
+            "owner_id": "284484063229",
+            "revoke_rules_on_delete": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-alb-sg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-alb-sg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.ecs",
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "ecs_tasks",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:security-group/sg-062fc68040e0b123c",
+            "description": "ECS Task security group - allow traffic from ALB only",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "Allow all outbound (ECR pull, AWS API calls, etc.)",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-062fc68040e0b123c",
+            "ingress": [
+              {
+                "cidr_blocks": [],
+                "description": "Allow traffic from ALB to app port",
+                "from_port": 8000,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [
+                  "sg-0d5fc41263db7fdfa"
+                ],
+                "self": false,
+                "to_port": 8000
+              }
+            ],
+            "name": "supplement-rec-dev-ecs-tasks-sg",
+            "name_prefix": "",
+            "owner_id": "284484063229",
+            "revoke_rules_on_delete": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-ecs-tasks-sg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-ecs-tasks-sg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "module.ecs.aws_security_group.alb",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_eip",
+      "name": "nat",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "address": null,
+            "allocation_id": "eipalloc-0784fa0d6407c07c8",
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:elastic-ip/eipalloc-0784fa0d6407c07c8",
+            "associate_with_private_ip": null,
+            "association_id": "eipassoc-06259199d8e800b3b",
+            "carrier_ip": "",
+            "customer_owned_ip": "",
+            "customer_owned_ipv4_pool": "",
+            "domain": "vpc",
+            "id": "eipalloc-0784fa0d6407c07c8",
+            "instance": "",
+            "ipam_pool_id": null,
+            "network_border_group": "ap-northeast-2",
+            "network_interface": "eni-03ff74dd1dbb58b42",
+            "private_dns": "ip-10-0-1-246.ap-northeast-2.compute.internal",
+            "private_ip": "10.0.1.246",
+            "ptr_record": "",
+            "public_dns": "ec2-15-164-194-177.ap-northeast-2.compute.amazonaws.com",
+            "public_ip": "15.164.194.177",
+            "public_ipv4_pool": "amazon",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-eip-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-eip-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc": true
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxODAwMDAwMDAwMDAsInJlYWQiOjkwMDAwMDAwMDAwMCwidXBkYXRlIjozMDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "address": null,
+            "allocation_id": "eipalloc-0658a4944167575f4",
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:elastic-ip/eipalloc-0658a4944167575f4",
+            "associate_with_private_ip": null,
+            "association_id": "eipassoc-0c8abf832a58394fd",
+            "carrier_ip": "",
+            "customer_owned_ip": "",
+            "customer_owned_ipv4_pool": "",
+            "domain": "vpc",
+            "id": "eipalloc-0658a4944167575f4",
+            "instance": "",
+            "ipam_pool_id": null,
+            "network_border_group": "ap-northeast-2",
+            "network_interface": "eni-073c9d4983ae182cf",
+            "private_dns": "ip-10-0-2-234.ap-northeast-2.compute.internal",
+            "private_ip": "10.0.2.234",
+            "ptr_record": "",
+            "public_dns": "ec2-43-200-228-213.ap-northeast-2.compute.amazonaws.com",
+            "public_ip": "43.200.228.213",
+            "public_ipv4_pool": "amazon",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-eip-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-eip-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc": true
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxODAwMDAwMDAwMDAsInJlYWQiOjkwMDAwMDAwMDAwMCwidXBkYXRlIjozMDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_internet_gateway",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:internet-gateway/igw-0649d49900e74c90f",
+            "id": "igw-0649d49900e74c90f",
+            "owner_id": "284484063229",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-igw",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-igw",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_nat_gateway",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "allocation_id": "eipalloc-0784fa0d6407c07c8",
+            "association_id": "eipassoc-06259199d8e800b3b",
+            "connectivity_type": "public",
+            "id": "nat-0b96bd2be51aed6e9",
+            "network_interface_id": "eni-03ff74dd1dbb58b42",
+            "private_ip": "10.0.1.246",
+            "public_ip": "15.164.194.177",
+            "secondary_allocation_ids": [],
+            "secondary_private_ip_address_count": 0,
+            "secondary_private_ip_addresses": [],
+            "subnet_id": "subnet-0eafc13f9bc0dc79d",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-gw-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-gw-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTgwMDAwMDAwMDAwMCwidXBkYXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "allocation_id": "eipalloc-0658a4944167575f4",
+            "association_id": "eipassoc-0c8abf832a58394fd",
+            "connectivity_type": "public",
+            "id": "nat-0d2bcb720245a9c0e",
+            "network_interface_id": "eni-073c9d4983ae182cf",
+            "private_ip": "10.0.2.234",
+            "public_ip": "43.200.228.213",
+            "secondary_allocation_ids": [],
+            "secondary_private_ip_address_count": 0,
+            "secondary_private_ip_addresses": [],
+            "subnet_id": "subnet-06c5f08030616389c",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-gw-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-nat-gw-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTgwMDAwMDAwMDAwMCwidXBkYXRlIjo2MDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_route_table",
+      "name": "private",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:route-table/rtb-065f7d60803f11cd4",
+            "id": "rtb-065f7d60803f11cd4",
+            "owner_id": "284484063229",
+            "propagating_vgws": [],
+            "route": [
+              {
+                "carrier_gateway_id": "",
+                "cidr_block": "0.0.0.0/0",
+                "core_network_arn": "",
+                "destination_prefix_list_id": "",
+                "egress_only_gateway_id": "",
+                "gateway_id": "",
+                "ipv6_cidr_block": "",
+                "local_gateway_id": "",
+                "nat_gateway_id": "nat-0b96bd2be51aed6e9",
+                "network_interface_id": "",
+                "transit_gateway_id": "",
+                "vpc_endpoint_id": "",
+                "vpc_peering_connection_id": ""
+              }
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-rt-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-rt-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_nat_gateway.main",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:route-table/rtb-07249014e9f30bb30",
+            "id": "rtb-07249014e9f30bb30",
+            "owner_id": "284484063229",
+            "propagating_vgws": [],
+            "route": [
+              {
+                "carrier_gateway_id": "",
+                "cidr_block": "0.0.0.0/0",
+                "core_network_arn": "",
+                "destination_prefix_list_id": "",
+                "egress_only_gateway_id": "",
+                "gateway_id": "",
+                "ipv6_cidr_block": "",
+                "local_gateway_id": "",
+                "nat_gateway_id": "nat-0d2bcb720245a9c0e",
+                "network_interface_id": "",
+                "transit_gateway_id": "",
+                "vpc_endpoint_id": "",
+                "vpc_peering_connection_id": ""
+              }
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-rt-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-rt-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_nat_gateway.main",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_route_table",
+      "name": "public",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:route-table/rtb-05a0197c2995f3003",
+            "id": "rtb-05a0197c2995f3003",
+            "owner_id": "284484063229",
+            "propagating_vgws": [],
+            "route": [
+              {
+                "carrier_gateway_id": "",
+                "cidr_block": "0.0.0.0/0",
+                "core_network_arn": "",
+                "destination_prefix_list_id": "",
+                "egress_only_gateway_id": "",
+                "gateway_id": "igw-0649d49900e74c90f",
+                "ipv6_cidr_block": "",
+                "local_gateway_id": "",
+                "nat_gateway_id": "",
+                "network_interface_id": "",
+                "transit_gateway_id": "",
+                "vpc_endpoint_id": "",
+                "vpc_peering_connection_id": ""
+              }
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-public-rt",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-public-rt",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_route_table_association",
+      "name": "private",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0014ff96ca597006b",
+            "route_table_id": "rtb-065f7d60803f11cd4",
+            "subnet_id": "subnet-01381794ca3023ae1",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_nat_gateway.main",
+            "module.networking.aws_route_table.private",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-096d8f7c4205b4c46",
+            "route_table_id": "rtb-07249014e9f30bb30",
+            "subnet_id": "subnet-095c4cabba862180b",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_nat_gateway.main",
+            "module.networking.aws_route_table.private",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_route_table_association",
+      "name": "public",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0687707385b842567",
+            "route_table_id": "rtb-05a0197c2995f3003",
+            "subnet_id": "subnet-0eafc13f9bc0dc79d",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_route_table.public",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-096515c2b00300701",
+            "route_table_id": "rtb-05a0197c2995f3003",
+            "subnet_id": "subnet-06c5f08030616389c",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_route_table.public",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "vpc_endpoints",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:security-group/sg-0256e810593583d27",
+            "description": "VPC Interface Endpoints security group - HTTPS only from private subnets",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "Allow all outbound",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-0256e810593583d27",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "10.0.0.0/16"
+                ],
+                "description": "Allow HTTPS from within VPC (ECS Task to VPC Endpoint)",
+                "from_port": 443,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 443
+              }
+            ],
+            "name": "supplement-rec-dev-vpc-endpoints-sg",
+            "name_prefix": "",
+            "owner_id": "284484063229",
+            "revoke_rules_on_delete": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-vpc-endpoints-sg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-vpc-endpoints-sg",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_subnet",
+      "name": "private",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:subnet/subnet-01381794ca3023ae1",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-northeast-2a",
+            "availability_zone_id": "apne2-az1",
+            "cidr_block": "10.0.10.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-01381794ca3023ae1",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "284484063229",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:subnet/subnet-095c4cabba862180b",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-northeast-2c",
+            "availability_zone_id": "apne2-az3",
+            "cidr_block": "10.0.11.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-095c4cabba862180b",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": false,
+            "outpost_arn": "",
+            "owner_id": "284484063229",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-private-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_subnet",
+      "name": "public",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:subnet/subnet-0eafc13f9bc0dc79d",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-northeast-2a",
+            "availability_zone_id": "apne2-az1",
+            "cidr_block": "10.0.1.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-0eafc13f9bc0dc79d",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": true,
+            "outpost_arn": "",
+            "owner_id": "284484063229",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-public-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability",
+              "kubernetes.io/role/elb": "1"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-public-1",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability",
+              "kubernetes.io/role/elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        },
+        {
+          "index_key": 1,
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:subnet/subnet-06c5f08030616389c",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "ap-northeast-2c",
+            "availability_zone_id": "apne2-az3",
+            "cidr_block": "10.0.2.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-06c5f08030616389c",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": true,
+            "outpost_arn": "",
+            "owner_id": "284484063229",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-public-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability",
+              "kubernetes.io/role/elb": "1"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-public-2",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability",
+              "kubernetes.io/role/elb": "1"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc/vpc-0e6f0127569fbf861",
+            "assign_generated_ipv6_cidr_block": false,
+            "cidr_block": "10.0.0.0/16",
+            "default_network_acl_id": "acl-04b66dc52d6e58ead",
+            "default_route_table_id": "rtb-0b2eec1e2250f00d1",
+            "default_security_group_id": "sg-0331ab012522a2785",
+            "dhcp_options_id": "dopt-032f93715bcef530c",
+            "enable_dns_hostnames": true,
+            "enable_dns_support": true,
+            "enable_network_address_usage_metrics": false,
+            "id": "vpc-0e6f0127569fbf861",
+            "instance_tenancy": "default",
+            "ipv4_ipam_pool_id": null,
+            "ipv4_netmask_length": null,
+            "ipv6_association_id": "",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_network_border_group": "",
+            "ipv6_ipam_pool_id": "",
+            "ipv6_netmask_length": 0,
+            "main_route_table_id": "rtb-0b2eec1e2250f00d1",
+            "owner_id": "284484063229",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-vpc",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-vpc",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ==",
+          "create_before_destroy": true
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc_endpoint",
+      "name": "ecr_api",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc-endpoint/vpce-075ab1bcee7eac8a0",
+            "auto_accept": null,
+            "cidr_blocks": [],
+            "dns_entry": [
+              {
+                "dns_name": "vpce-075ab1bcee7eac8a0-a77f64go.api.ecr.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-075ab1bcee7eac8a0-a77f64go-ap-northeast-2a.api.ecr.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-075ab1bcee7eac8a0-a77f64go-ap-northeast-2c.api.ecr.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "api.ecr.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z0964965FHILZTS5XF8R"
+              },
+              {
+                "dns_name": "ecr.ap-northeast-2.api.aws",
+                "hosted_zone_id": "Z09647923VNG5K7JJ8ZYR"
+              }
+            ],
+            "dns_options": [
+              {
+                "dns_record_ip_type": "ipv4",
+                "private_dns_only_for_inbound_resolver_endpoint": false
+              }
+            ],
+            "id": "vpce-075ab1bcee7eac8a0",
+            "ip_address_type": "ipv4",
+            "network_interface_ids": [
+              "eni-014aeb05985a2fca3",
+              "eni-0ac47bb0c86d91354"
+            ],
+            "owner_id": "284484063229",
+            "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+            "prefix_list_id": null,
+            "private_dns_enabled": true,
+            "requester_managed": false,
+            "resource_configuration_arn": "",
+            "route_table_ids": [],
+            "security_group_ids": [
+              "sg-0256e810593583d27"
+            ],
+            "service_name": "com.amazonaws.ap-northeast-2.ecr.api",
+            "service_network_arn": "",
+            "service_region": "ap-northeast-2",
+            "state": "available",
+            "subnet_configuration": [
+              {
+                "ipv4": "10.0.10.14",
+                "ipv6": "",
+                "subnet_id": "subnet-01381794ca3023ae1"
+              },
+              {
+                "ipv4": "10.0.11.47",
+                "ipv6": "",
+                "subnet_id": "subnet-095c4cabba862180b"
+              }
+            ],
+            "subnet_ids": [
+              "subnet-01381794ca3023ae1",
+              "subnet-095c4cabba862180b"
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-ecr-api",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-ecr-api",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_endpoint_type": "Interface",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_security_group.vpc_endpoints",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc_endpoint",
+      "name": "ecr_dkr",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc-endpoint/vpce-00fb8125ae8aaf2ba",
+            "auto_accept": null,
+            "cidr_blocks": [],
+            "dns_entry": [
+              {
+                "dns_name": "vpce-00fb8125ae8aaf2ba-6924jc5b.dkr.ecr.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-00fb8125ae8aaf2ba-6924jc5b-ap-northeast-2c.dkr.ecr.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-00fb8125ae8aaf2ba-6924jc5b-ap-northeast-2a.dkr.ecr.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "dkr.ecr.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z09607763486N3FBFB5HV"
+              },
+              {
+                "dns_name": "*.dkr.ecr.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z09607763486N3FBFB5HV"
+              },
+              {
+                "dns_name": "dkr-ecr.ap-northeast-2.on.aws",
+                "hosted_zone_id": "Z05158483GWVVQVK90RZ9"
+              },
+              {
+                "dns_name": "*.dkr-ecr.ap-northeast-2.on.aws",
+                "hosted_zone_id": "Z05158483GWVVQVK90RZ9"
+              }
+            ],
+            "dns_options": [
+              {
+                "dns_record_ip_type": "ipv4",
+                "private_dns_only_for_inbound_resolver_endpoint": false
+              }
+            ],
+            "id": "vpce-00fb8125ae8aaf2ba",
+            "ip_address_type": "ipv4",
+            "network_interface_ids": [
+              "eni-05897c75383103109",
+              "eni-08001420ad6ec278c"
+            ],
+            "owner_id": "284484063229",
+            "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+            "prefix_list_id": null,
+            "private_dns_enabled": true,
+            "requester_managed": false,
+            "resource_configuration_arn": "",
+            "route_table_ids": [],
+            "security_group_ids": [
+              "sg-0256e810593583d27"
+            ],
+            "service_name": "com.amazonaws.ap-northeast-2.ecr.dkr",
+            "service_network_arn": "",
+            "service_region": "ap-northeast-2",
+            "state": "available",
+            "subnet_configuration": [
+              {
+                "ipv4": "10.0.10.167",
+                "ipv6": "",
+                "subnet_id": "subnet-01381794ca3023ae1"
+              },
+              {
+                "ipv4": "10.0.11.167",
+                "ipv6": "",
+                "subnet_id": "subnet-095c4cabba862180b"
+              }
+            ],
+            "subnet_ids": [
+              "subnet-01381794ca3023ae1",
+              "subnet-095c4cabba862180b"
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-ecr-dkr",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-ecr-dkr",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_endpoint_type": "Interface",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_security_group.vpc_endpoints",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc_endpoint",
+      "name": "logs",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc-endpoint/vpce-0cb50a60e35309059",
+            "auto_accept": null,
+            "cidr_blocks": [],
+            "dns_entry": [
+              {
+                "dns_name": "vpce-0cb50a60e35309059-16audfmx.logs.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-0cb50a60e35309059-16audfmx-ap-northeast-2a.logs.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-0cb50a60e35309059-16audfmx-ap-northeast-2c.logs.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "logs.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z09645742NDHI7TR5UJ1B"
+              },
+              {
+                "dns_name": "logs.ap-northeast-2.api.aws",
+                "hosted_zone_id": "Z096407787QRRGJ7VFH3"
+              },
+              {
+                "dns_name": "streaming-logs.ap-northeast-2.api.aws",
+                "hosted_zone_id": "Z0964071159TD3XN2YFZ7"
+              },
+              {
+                "dns_name": "streaming-logs.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z0965419P0L3IM2VZ88Q"
+              }
+            ],
+            "dns_options": [
+              {
+                "dns_record_ip_type": "ipv4",
+                "private_dns_only_for_inbound_resolver_endpoint": false
+              }
+            ],
+            "id": "vpce-0cb50a60e35309059",
+            "ip_address_type": "ipv4",
+            "network_interface_ids": [
+              "eni-03b76b898d3269fa6",
+              "eni-0bb8102c9514b1f8c"
+            ],
+            "owner_id": "284484063229",
+            "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+            "prefix_list_id": null,
+            "private_dns_enabled": true,
+            "requester_managed": false,
+            "resource_configuration_arn": "",
+            "route_table_ids": [],
+            "security_group_ids": [
+              "sg-0256e810593583d27"
+            ],
+            "service_name": "com.amazonaws.ap-northeast-2.logs",
+            "service_network_arn": "",
+            "service_region": "ap-northeast-2",
+            "state": "available",
+            "subnet_configuration": [
+              {
+                "ipv4": "10.0.10.148",
+                "ipv6": "",
+                "subnet_id": "subnet-01381794ca3023ae1"
+              },
+              {
+                "ipv4": "10.0.11.141",
+                "ipv6": "",
+                "subnet_id": "subnet-095c4cabba862180b"
+              }
+            ],
+            "subnet_ids": [
+              "subnet-01381794ca3023ae1",
+              "subnet-095c4cabba862180b"
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-logs",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-logs",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_endpoint_type": "Interface",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_security_group.vpc_endpoints",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc_endpoint",
+      "name": "monitoring",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc-endpoint/vpce-043fbeb92e241ba04",
+            "auto_accept": null,
+            "cidr_blocks": [],
+            "dns_entry": [
+              {
+                "dns_name": "vpce-043fbeb92e241ba04-awb36o4g.monitoring.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-043fbeb92e241ba04-awb36o4g-ap-northeast-2a.monitoring.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-043fbeb92e241ba04-awb36o4g-ap-northeast-2c.monitoring.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "monitoring.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z09838222UVGQ9JU96B2S"
+              },
+              {
+                "dns_name": "monitoring.ap-northeast-2.api.aws",
+                "hosted_zone_id": "Z09593873B3UKCTMNP9WQ"
+              }
+            ],
+            "dns_options": [
+              {
+                "dns_record_ip_type": "ipv4",
+                "private_dns_only_for_inbound_resolver_endpoint": false
+              }
+            ],
+            "id": "vpce-043fbeb92e241ba04",
+            "ip_address_type": "ipv4",
+            "network_interface_ids": [
+              "eni-064ecd8d03d61beb4",
+              "eni-0db7f9afd5bc098c4"
+            ],
+            "owner_id": "284484063229",
+            "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+            "prefix_list_id": null,
+            "private_dns_enabled": true,
+            "requester_managed": false,
+            "resource_configuration_arn": "",
+            "route_table_ids": [],
+            "security_group_ids": [
+              "sg-0256e810593583d27"
+            ],
+            "service_name": "com.amazonaws.ap-northeast-2.monitoring",
+            "service_network_arn": "",
+            "service_region": "ap-northeast-2",
+            "state": "available",
+            "subnet_configuration": [
+              {
+                "ipv4": "10.0.10.144",
+                "ipv6": "",
+                "subnet_id": "subnet-01381794ca3023ae1"
+              },
+              {
+                "ipv4": "10.0.11.157",
+                "ipv6": "",
+                "subnet_id": "subnet-095c4cabba862180b"
+              }
+            ],
+            "subnet_ids": [
+              "subnet-01381794ca3023ae1",
+              "subnet-095c4cabba862180b"
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-monitoring",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-monitoring",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_endpoint_type": "Interface",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_security_group.vpc_endpoints",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc_endpoint",
+      "name": "s3",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc-endpoint/vpce-0599c3c517fd9e010",
+            "auto_accept": null,
+            "cidr_blocks": [
+              "52.219.202.0/23",
+              "52.219.144.0/22",
+              "52.219.204.0/22",
+              "3.5.144.0/23",
+              "3.5.140.0/22",
+              "52.219.148.0/23",
+              "52.219.60.0/23",
+              "3.5.184.0/21",
+              "52.219.56.0/22"
+            ],
+            "dns_entry": [],
+            "dns_options": [
+              {
+                "dns_record_ip_type": "service-defined",
+                "private_dns_only_for_inbound_resolver_endpoint": false
+              }
+            ],
+            "id": "vpce-0599c3c517fd9e010",
+            "ip_address_type": "ipv4",
+            "network_interface_ids": [],
+            "owner_id": "284484063229",
+            "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}],\"Version\":\"2008-10-17\"}",
+            "prefix_list_id": "pl-78a54011",
+            "private_dns_enabled": false,
+            "requester_managed": false,
+            "resource_configuration_arn": "",
+            "route_table_ids": [
+              "rtb-065f7d60803f11cd4",
+              "rtb-07249014e9f30bb30"
+            ],
+            "security_group_ids": [],
+            "service_name": "com.amazonaws.ap-northeast-2.s3",
+            "service_network_arn": "",
+            "service_region": "ap-northeast-2",
+            "state": "available",
+            "subnet_configuration": [],
+            "subnet_ids": [],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-s3",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-s3",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_endpoint_type": "Gateway",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_eip.nat",
+            "module.networking.aws_internet_gateway.main",
+            "module.networking.aws_nat_gateway.main",
+            "module.networking.aws_route_table.private",
+            "module.networking.aws_subnet.public",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.networking",
+      "mode": "managed",
+      "type": "aws_vpc_endpoint",
+      "name": "xray",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:ap-northeast-2:284484063229:vpc-endpoint/vpce-06af431b9330e1652",
+            "auto_accept": null,
+            "cidr_blocks": [],
+            "dns_entry": [
+              {
+                "dns_name": "vpce-06af431b9330e1652-j03z830p.xray.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-06af431b9330e1652-j03z830p-ap-northeast-2a.xray.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "vpce-06af431b9330e1652-j03z830p-ap-northeast-2c.xray.ap-northeast-2.vpce.amazonaws.com",
+                "hosted_zone_id": "Z27UANNT0PRK1T"
+              },
+              {
+                "dns_name": "xray.ap-northeast-2.amazonaws.com",
+                "hosted_zone_id": "Z0509720Y9U55Z5CTUGO"
+              },
+              {
+                "dns_name": "xray.ap-northeast-2.api.aws",
+                "hosted_zone_id": "Z0983465M40RQTUDJTHW"
+              }
+            ],
+            "dns_options": [
+              {
+                "dns_record_ip_type": "ipv4",
+                "private_dns_only_for_inbound_resolver_endpoint": false
+              }
+            ],
+            "id": "vpce-06af431b9330e1652",
+            "ip_address_type": "ipv4",
+            "network_interface_ids": [
+              "eni-04c7f58d357579e55",
+              "eni-0d7ba2fc27bb3420b"
+            ],
+            "owner_id": "284484063229",
+            "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+            "prefix_list_id": null,
+            "private_dns_enabled": true,
+            "requester_managed": false,
+            "resource_configuration_arn": "",
+            "route_table_ids": [],
+            "security_group_ids": [
+              "sg-0256e810593583d27"
+            ],
+            "service_name": "com.amazonaws.ap-northeast-2.xray",
+            "service_network_arn": "",
+            "service_region": "ap-northeast-2",
+            "state": "available",
+            "subnet_configuration": [
+              {
+                "ipv4": "10.0.10.126",
+                "ipv6": "",
+                "subnet_id": "subnet-01381794ca3023ae1"
+              },
+              {
+                "ipv4": "10.0.11.49",
+                "ipv6": "",
+                "subnet_id": "subnet-095c4cabba862180b"
+              }
+            ],
+            "subnet_ids": [
+              "subnet-01381794ca3023ae1",
+              "subnet-095c4cabba862180b"
+            ],
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-xray",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-endpoint-xray",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "timeouts": null,
+            "vpc_endpoint_type": "Interface",
+            "vpc_id": "vpc-0e6f0127569fbf861"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "module.networking.aws_security_group.vpc_endpoints",
+            "module.networking.aws_subnet.private",
+            "module.networking.aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_cloudwatch_log_group",
+      "name": "adot",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev/adot-collector",
+            "id": "/ecs/supplement-rec-dev/adot-collector",
+            "kms_key_id": "",
+            "log_group_class": "STANDARD",
+            "name": "/ecs/supplement-rec-dev/adot-collector",
+            "name_prefix": "",
+            "retention_in_days": 30,
+            "skip_destroy": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "/ecs/supplement-rec-dev/adot-collector",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "/ecs/supplement-rec-dev/adot-collector",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_cloudwatch_log_group",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev",
+            "id": "/ecs/supplement-rec-dev",
+            "kms_key_id": "",
+            "log_group_class": "STANDARD",
+            "name": "/ecs/supplement-rec-dev",
+            "name_prefix": "",
+            "retention_in_days": 30,
+            "skip_destroy": false,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "/ecs/supplement-rec-dev",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "/ecs/supplement-rec-dev",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_cloudwatch_log_metric_filter",
+      "name": "adot_error",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-adot-error",
+            "log_group_name": "/ecs/supplement-rec-dev/adot-collector",
+            "metric_transformation": [
+              {
+                "default_value": "0",
+                "dimensions": {},
+                "name": "AdotExporterError",
+                "namespace": "supplement-rec/dev",
+                "unit": "Count",
+                "value": "1"
+              }
+            ],
+            "name": "supplement-rec-dev-adot-error",
+            "pattern": "?exporter_send_failed ?Exporter ?error"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_cloudwatch_log_group.adot"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_cloudwatch_log_metric_filter",
+      "name": "error_count",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-error-count",
+            "log_group_name": "/ecs/supplement-rec-dev",
+            "metric_transformation": [
+              {
+                "default_value": "0",
+                "dimensions": {},
+                "name": "ErrorCount",
+                "namespace": "supplement-rec/dev",
+                "unit": "Count",
+                "value": "1"
+              }
+            ],
+            "name": "supplement-rec-dev-error-count",
+            "pattern": "?ERROR ?error ?Error"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_cloudwatch_log_group.app"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_cloudwatch_log_metric_filter",
+      "name": "http_5xx",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-http-5xx",
+            "log_group_name": "/ecs/supplement-rec-dev",
+            "metric_transformation": [
+              {
+                "default_value": "0",
+                "dimensions": {},
+                "name": "Http5xxCount",
+                "namespace": "supplement-rec/dev",
+                "unit": "Count",
+                "value": "1"
+              }
+            ],
+            "name": "supplement-rec-dev-http-5xx",
+            "pattern": "{ $.statusCode \u003e= 500 }"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_cloudwatch_log_group.app"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "adot_task",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::284484063229:role/supplement-rec-dev-adot-task-role",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2026-03-09T01:05:30Z",
+            "description": "ADOT Sidecar Task Role - minimal permissions for AMP/X-Ray/CloudWatch Logs",
+            "force_detach_policies": false,
+            "id": "supplement-rec-dev-adot-task-role",
+            "inline_policy": [
+              {
+                "name": "supplement-rec-dev-adot-amp-policy",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"aps:RemoteWrite\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:aps:ap-northeast-2:284484063229:workspace/ws-575a1e7d-fc5e-4783-b009-7b680150cedd\",\"Sid\":\"AMPRemoteWrite\"}]}"
+              },
+              {
+                "name": "supplement-rec-dev-adot-logs-describe-policy",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"logs:DescribeLogStreams\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev:*\",\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev/adot-collector:*\"],\"Sid\":\"CloudWatchLogsDescribe\"}]}"
+              },
+              {
+                "name": "supplement-rec-dev-adot-logs-policy",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev:*\",\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev/adot-collector:*\"],\"Sid\":\"CloudWatchLogsWrite\"}]}"
+              },
+              {
+                "name": "supplement-rec-dev-adot-xray-policy",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"xray:PutTraceSegments\",\"xray:PutTelemetryRecords\",\"xray:GetSamplingRules\",\"xray:GetSamplingTargets\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"XRayTraceWrite\"}]}"
+              }
+            ],
+            "managed_policy_arns": [],
+            "max_session_duration": 3600,
+            "name": "supplement-rec-dev-adot-task-role",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "unique_id": "AROAUEPESJ767JC6F7INI"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "adot_amp",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-adot-task-role:supplement-rec-dev-adot-amp-policy",
+            "name": "supplement-rec-dev-adot-amp-policy",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"aps:RemoteWrite\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:aps:ap-northeast-2:284484063229:workspace/ws-575a1e7d-fc5e-4783-b009-7b680150cedd\",\"Sid\":\"AMPRemoteWrite\"}]}",
+            "role": "supplement-rec-dev-adot-task-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_iam_role.adot_task",
+            "module.observability.aws_prometheus_workspace.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "adot_logs",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-adot-task-role:supplement-rec-dev-adot-logs-policy",
+            "name": "supplement-rec-dev-adot-logs-policy",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"logs:CreateLogStream\",\"logs:PutLogEvents\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev:*\",\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev/adot-collector:*\"],\"Sid\":\"CloudWatchLogsWrite\"}]}",
+            "role": "supplement-rec-dev-adot-task-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_cloudwatch_log_group.adot",
+            "module.observability.aws_cloudwatch_log_group.app",
+            "module.observability.aws_iam_role.adot_task"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "adot_logs_describe",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-adot-task-role:supplement-rec-dev-adot-logs-describe-policy",
+            "name": "supplement-rec-dev-adot-logs-describe-policy",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"logs:DescribeLogStreams\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev:*\",\"arn:aws:logs:ap-northeast-2:284484063229:log-group:/ecs/supplement-rec-dev/adot-collector:*\"],\"Sid\":\"CloudWatchLogsDescribe\"}]}",
+            "role": "supplement-rec-dev-adot-task-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_cloudwatch_log_group.adot",
+            "module.observability.aws_cloudwatch_log_group.app",
+            "module.observability.aws_iam_role.adot_task"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "adot_xray",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "supplement-rec-dev-adot-task-role:supplement-rec-dev-adot-xray-policy",
+            "name": "supplement-rec-dev-adot-xray-policy",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"xray:PutTraceSegments\",\"xray:PutTelemetryRecords\",\"xray:GetSamplingRules\",\"xray:GetSamplingTargets\"],\"Effect\":\"Allow\",\"Resource\":\"*\",\"Sid\":\"XRayTraceWrite\"}]}",
+            "role": "supplement-rec-dev-adot-task-role"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_iam_role.adot_task"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_prometheus_rule_group_namespace",
+      "name": "sli_recording_rules",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:aps:ap-northeast-2:284484063229:rulegroupsnamespace/ws-575a1e7d-fc5e-4783-b009-7b680150cedd/sli-recording-rules",
+            "data": "groups:\n  # -----------------------------------------------------------------------\n  # HTTP 요청 통계 — 1분 단위 사전 계산\n  # -----------------------------------------------------------------------\n  - name: http_request_stats\n    interval: 60s\n    rules:\n      # 초당 요청 수 (엔드포인트별)\n      - record: job:http_requests_total:rate5m\n        expr: |\n          sum by (job, http_method, http_route, http_status_code) (\n            rate(http_server_duration_milliseconds_count[5m])\n          )\n\n      # 에러 요청 비율 (5xx 응답)\n      # 분모가 0인 경우(요청 없음) NaN 방지: or vector(0)\n      - record: job:http_error_rate:rate5m\n        expr: |\n          sum by (job) (\n            rate(http_server_duration_milliseconds_count{http_status_code=~\"5..\"}[5m])\n          )\n          /\n          sum by (job) (\n            rate(http_server_duration_milliseconds_count[5m])\n          )\n\n      # 성공 요청 비율 (SLI 가용성 계산용)\n      - record: job:http_success_rate:rate5m\n        expr: |\n          sum by (job) (\n            rate(http_server_duration_milliseconds_count{http_status_code=~\"2..|3..\"}[5m])\n          )\n          /\n          sum by (job) (\n            rate(http_server_duration_milliseconds_count[5m])\n          )\n\n  # -----------------------------------------------------------------------\n  # 레이턴시 — Histogram에서 Quantile 사전 계산\n  # Histogram 데이터는 OTel SDK + ADOT → AMP로 전송됩니다.\n  # -----------------------------------------------------------------------\n  - name: latency_percentiles\n    interval: 60s\n    rules:\n      # P99 레이턴시 (ms)\n      - record: job:http_request_duration_ms:p99\n        expr: |\n          histogram_quantile(0.99,\n            sum by (job, le) (\n              rate(http_server_duration_milliseconds_bucket[5m])\n            )\n          )\n\n      # P95 레이턴시 (ms)\n      - record: job:http_request_duration_ms:p95\n        expr: |\n          histogram_quantile(0.95,\n            sum by (job, le) (\n              rate(http_server_duration_milliseconds_bucket[5m])\n            )\n          )\n\n      # P50 레이턴시 (ms)\n      - record: job:http_request_duration_ms:p50\n        expr: |\n          histogram_quantile(0.50,\n            sum by (job, le) (\n              rate(http_server_duration_milliseconds_bucket[5m])\n            )\n          )\n\n      # 추천 API 전용 P99 (알고리즘 성능 추적)\n      - record: job:recommendation_api_duration_ms:p99\n        expr: |\n          histogram_quantile(0.99,\n            sum by (job, le) (\n              rate(http_server_duration_milliseconds_bucket{http_route=~\"/api/v1/recommend.*\"}[5m])\n            )\n          )\n\n  # -----------------------------------------------------------------------\n  # SLO Error Budget 추적 — 30일 rolling window\n  # SLO 목표: 가용성 99.9% (허용 에러 비율 0.1%)\n  # -----------------------------------------------------------------------\n  - name: error_budget\n    interval: 300s  # 5분마다 계산 (비용 절감)\n    rules:\n      # 30일 성공률\n      - record: job:http_success_rate:30d\n        expr: |\n          sum by (job) (\n            rate(http_server_duration_milliseconds_count{http_status_code=~\"2..|3..\"}[30d])\n          )\n          /\n          sum by (job) (\n            rate(http_server_duration_milliseconds_count[30d])\n          )\n\n      # Error Budget 잔량 (0이면 SLO 위반)\n      # 목표 가용성: 99.9% → 허용 에러 비율 0.1% = 0.001\n      # 잔량 = (실제 에러 비율) / (허용 에러 비율)\n      # 0.3 이하: Warning / 0.1 이하: Critical\n      - record: job:error_budget_remaining:30d\n        expr: |\n          1 - (\n            (1 - job:http_success_rate:30d) / 0.001\n          )\n",
+            "id": "arn:aws:aps:ap-northeast-2:284484063229:rulegroupsnamespace/ws-575a1e7d-fc5e-4783-b009-7b680150cedd/sli-recording-rules",
+            "name": "sli-recording-rules",
+            "tags": {},
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "workspace_id": "ws-575a1e7d-fc5e-4783-b009-7b680150cedd"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_prometheus_workspace.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_prometheus_workspace",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "alias": "supplement-rec-dev",
+            "arn": "arn:aws:aps:ap-northeast-2:284484063229:workspace/ws-575a1e7d-fc5e-4783-b009-7b680150cedd",
+            "id": "ws-575a1e7d-fc5e-4783-b009-7b680150cedd",
+            "kms_key_arn": "",
+            "logging_configuration": [],
+            "prometheus_endpoint": "https://aps-workspaces.ap-northeast-2.amazonaws.com/workspaces/ws-575a1e7d-fc5e-4783-b009-7b680150cedd/",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-amp",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-amp",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_sns_topic",
+      "name": "alarms",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "application_failure_feedback_role_arn": "",
+            "application_success_feedback_role_arn": "",
+            "application_success_feedback_sample_rate": 0,
+            "archive_policy": "",
+            "arn": "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms",
+            "beginning_archive_time": "",
+            "content_based_deduplication": false,
+            "delivery_policy": "",
+            "display_name": "supplement-rec dev 알람",
+            "fifo_throughput_scope": "",
+            "fifo_topic": false,
+            "firehose_failure_feedback_role_arn": "",
+            "firehose_success_feedback_role_arn": "",
+            "firehose_success_feedback_sample_rate": 0,
+            "http_failure_feedback_role_arn": "",
+            "http_success_feedback_role_arn": "",
+            "http_success_feedback_sample_rate": 0,
+            "id": "arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms",
+            "kms_master_key_id": "",
+            "lambda_failure_feedback_role_arn": "",
+            "lambda_success_feedback_role_arn": "",
+            "lambda_success_feedback_sample_rate": 0,
+            "name": "supplement-rec-dev-alarms",
+            "name_prefix": "",
+            "owner": "284484063229",
+            "policy": "{\"Id\":\"__default_policy_ID\",\"Statement\":[{\"Action\":[\"SNS:GetTopicAttributes\",\"SNS:SetTopicAttributes\",\"SNS:AddPermission\",\"SNS:RemovePermission\",\"SNS:DeleteTopic\",\"SNS:Subscribe\",\"SNS:ListSubscriptionsByTopic\",\"SNS:Publish\"],\"Condition\":{\"StringEquals\":{\"AWS:SourceOwner\":\"284484063229\"}},\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Resource\":\"arn:aws:sns:ap-northeast-2:284484063229:supplement-rec-dev-alarms\",\"Sid\":\"__default_statement_ID\"}],\"Version\":\"2008-10-17\"}",
+            "signature_version": 0,
+            "sqs_failure_feedback_role_arn": "",
+            "sqs_success_feedback_role_arn": "",
+            "sqs_success_feedback_sample_rate": 0,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tracing_config": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_ssm_parameter",
+      "name": "adot_config",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "allowed_pattern": "",
+            "arn": "arn:aws:ssm:ap-northeast-2:284484063229:parameter/supplement-rec/dev/adot-config",
+            "data_type": "text",
+            "description": "ADOT collector configuration for supplement-rec-dev",
+            "has_value_wo": null,
+            "id": "/supplement-rec/dev/adot-config",
+            "insecure_value": null,
+            "key_id": "",
+            "name": "/supplement-rec/dev/adot-config",
+            "overwrite": null,
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-adot-config",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Name": "supplement-rec-dev-adot-config",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tier": "Standard",
+            "type": "String",
+            "value": "extensions:\n  health_check:\n    endpoint: 0.0.0.0:13133\n  sigv4auth:\n    region: ap-northeast-2\n    service: aps\n\nreceivers:\n  otlp:\n    protocols:\n      grpc:\n        endpoint: 0.0.0.0:4317\n      http:\n        endpoint: 0.0.0.0:4318\n\n  # ECS Task CPU/메모리 메트릭 자동 수집\n  awsecscontainermetrics:\n    collection_interval: 20s\n\nprocessors:\n  memory_limiter:\n    check_interval: 1s\n    limit_mib: 200\n    spike_limit_mib: 50\n\n  batch:\n    timeout: 5s\n    send_batch_size: 512\n\n  resource:\n    attributes:\n      - key: service.name\n        value: supplement-rec-dev\n        action: upsert\n      - key: deployment.environment\n        value: dev\n        action: upsert\n\nexporters:\n  prometheusremotewrite:\n    endpoint: https://aps-workspaces.ap-northeast-2.amazonaws.com/workspaces/ws-575a1e7d-fc5e-4783-b009-7b680150cedd/api/v1/remote_write\n    auth:\n      authenticator: sigv4auth\n\n  awsxray:\n    region: ap-northeast-2\n\n  awscloudwatchlogs:\n    log_group_name: /ecs/supplement-rec-dev\n    log_stream_name: otel-logs\n    region: ap-northeast-2\n\nservice:\n  extensions: [health_check, sigv4auth]\n  pipelines:\n    metrics:\n      receivers: [otlp, awsecscontainermetrics]\n      processors: [memory_limiter, batch, resource]\n      exporters: [prometheusremotewrite]\n    traces:\n      receivers: [otlp]\n      processors: [memory_limiter, batch, resource]\n      exporters: [awsxray]\n    logs:\n      receivers: [otlp]\n      processors: [memory_limiter, batch, resource]\n      exporters: [awscloudwatchlogs]\n",
+            "value_wo": null,
+            "value_wo_version": null,
+            "version": 1
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "value"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "value_wo"
+              }
+            ]
+          ],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "module.observability.aws_prometheus_workspace.main"
+          ]
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_xray_sampling_rule",
+      "name": "general_api",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:xray:ap-northeast-2:284484063229:sampling-rule/supplement-rec-dev-general-api",
+            "attributes": {},
+            "fixed_rate": 0.05,
+            "host": "*",
+            "http_method": "*",
+            "id": "supplement-rec-dev-general-api",
+            "priority": 500,
+            "reservoir_size": 1,
+            "resource_arn": "*",
+            "rule_name": "supplement-rec-dev-general-api",
+            "service_name": "supplement-rec-dev",
+            "service_type": "*",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "url_path": "*",
+            "version": 1
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_xray_sampling_rule",
+      "name": "health_check",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:xray:ap-northeast-2:284484063229:sampling-rule/supplement-rec-dev-health-check",
+            "attributes": {},
+            "fixed_rate": 0,
+            "host": "*",
+            "http_method": "GET",
+            "id": "supplement-rec-dev-health-check",
+            "priority": 200,
+            "reservoir_size": 0,
+            "resource_arn": "*",
+            "rule_name": "supplement-rec-dev-health-check",
+            "service_name": "supplement-rec-dev",
+            "service_type": "*",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "url_path": "/health",
+            "version": 1
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "module": "module.observability",
+      "mode": "managed",
+      "type": "aws_xray_sampling_rule",
+      "name": "recommendation_api",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:xray:ap-northeast-2:284484063229:sampling-rule/supplement-rec-dev-rec-api",
+            "attributes": {},
+            "fixed_rate": 0.1,
+            "host": "*",
+            "http_method": "*",
+            "id": "supplement-rec-dev-rec-api",
+            "priority": 100,
+            "reservoir_size": 2,
+            "resource_arn": "*",
+            "rule_name": "supplement-rec-dev-rec-api",
+            "service_name": "supplement-rec-dev",
+            "service_type": "*",
+            "tags": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "tags_all": {
+              "Environment": "dev",
+              "ManagedBy": "terraform",
+              "Project": "supplement-rec",
+              "Repository": "ecs-observability"
+            },
+            "url_path": "/api/v1/recommend*",
+            "version": 1
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
